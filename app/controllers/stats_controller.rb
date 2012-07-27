@@ -5,7 +5,7 @@ class StatsController < ApplicationController
     @stats = Stat.all
     
     #ROO
-    #@oo = Openoffice.new("Current.ods")
+    @oo = Openoffice.new("Current.ods")
     
     respond_to do |format|
       format.html # index.html.erb

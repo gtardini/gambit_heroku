@@ -1,32 +1,904 @@
-<h1>Listing stats</h1>
-
-<table>
-  <tr>
-    <th>Min</th>
-    <th>Max</th>
-    <th>Right</th>
-    <th>Draw</th>
-    <th>Wrong</th>
-    <th>Percentage</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @stats.each do |stat| %>
-  <tr>
-    <td><%= stat.min %></td>
-    <td><%= stat.max %></td>
-    <td><%= stat.right %></td>
-    <td><%= stat.draw %></td>
-    <td><%= stat.wrong %></td>
-    <td><%= stat.percentage %></td>
-    <td><%= link_to 'Show', stat %></td>
-    <td><%= link_to 'Edit', edit_stat_path(stat) %></td>
-    <td><%= link_to 'Destroy', stat, confirm: 'Are you sure?', method: :delete %></td>
-  </tr>
-<% end %>
-</table>
+<div id="floater" name="floater" style="position:fixed; top:20px; left:100px; width:200px; height:500px;">
+	<a href="http://www.scibet.com" >SciBet</a><br>
+	<a href="http://betvirus.com">BetVirus</a><br>
+	<a href="http://www.whoscored.com">WhoScored</a><br>
+	<a href="http://www.soccerstats.com">SoccerStats</a><br>
+	<a href="http://www.betbrain.com/football">BetBrain</a><br>
+	<a href="http://www.betexplorer.com/">BetExplorer</a><br>
+	<a href="http://www.betswelike.com">BetsWeLike</a><br><br>
+	
+	<a href="http://www.football-bet-data.yows.co.uk/" style="font-size:14px">Football-Bet-Data.co.uk Tool</a><br>
+	<a href="http://www.goldenbet.com">GoldenBet</a><br>
+	<a href="http://www.click4soccer.com/it/Main.php">Click4Soccer</a><br>
+	<a href="http://www.bet-portal.net/en/prediction.html">BetPortal</a><br>
+</div>
 <br />
+    <style type="text/css">
+      body { color: #222; font: normal normal 400 100%/1.5em georgia,serif; margin: 3em auto; width: 40em }
+      a:link { color: #3366CC }
+      a:visited { color: #224488 }
+      blockquote,ol,p,ul { display: block; margin: 0 0 1.5em }
+      blockquote { border-left: solid .1em #E4E4E4; color: #919191; padding: 0 1.5em 0 1.4em }
+      code { font: normal normal 87.5%/1.71428571em monospace,sans-serif }
+      img { display: block; margin: 1.5em auto }
+      pre { display: block; font: normal normal 87.5%/1.71428571em monospace,sans-serif; margin: 1.71428571em }
+      h1,h2,h3,h4,h5,h6 { font-weight: 400 }
+      h1 { font-size: 225%; line-height: 1.3334em; margin: 0 0 .1666em }
+      h2 { font-size: 175%; line-height: 1.28571429em; margin: 0 0 .35714286em }
+      h3 { font-size: 137.5%; line-height: 1.3636em; margin: 0 0 .5em }
+      h4,h5,h6 { font-size: 112.5%; line-height: 1.3334em; margin: 0 0 .7778em }
+      ol,ul { list-style-position: outside; padding: 0 }
+      ol ol,ol ul,ul ol,ul ul { margin: 0 0 .75em 2em }
+      table { border-collapse: collapse; margin: 1.5em 0; width: 100% }
+      td,th { border: solid .1em #000; font-family: sans-serif; font-size: 87.5%; line-height: 1.71428571em; text-align: center }
+    </style>
+    <h1>quick risk assessment algorithm</h1>
+<ul><li>the less black swans the less the risk
+<li>the higher the mixed percentage of tabella percentage and roo computed percentage the less the risk
+</li></ul><h2>rough formula:</h2>
+<p>mixed_percentage = (tabella_perc + roo_perc)/2</p>
+<p><strong>chance = mixed_percentage/(black_swans_number+1)</strong></p>
+<p>the higher <strong>chance</strong> is, the easier a bet is, but the odds will likely be low.</p>
+<h3>example workflow:</h3>
+<ol><li>compute the chance of every single available bet
+<li>pick the entry point manually by checking a mashup of several prediction websites (e.g. scibet)
+<li>discard all the subsequent matches if they start in less than an hour (or an hour and half) from the beginning of the previous match (at the first iteration, from the beginning of the entry point).
+<li>prioritize the matches with higher chance.
+</li></ol><h4>need to take odds and needed money into account</h4>
+<p><strong>odds_weighted_chance = chance/odds</strong></p>
+<p>the higher the odds, the less the chance will be, but now we have to take into account the fact that the higher the chance the more money we need (and this is negative):</p>
+<blockquote><blockquote><p><strong>money_needed = money_wanted * (odds-1)</strong></p></blockquote>
+<blockquote><blockquote><p><strong>chance_weighted_convenience = chance/money_needed</strong>         and the higher it is the better it is.</p></blockquote>
+</blockquote></blockquote>
 
-<%= link_to 'New Stat', new_stat_path %>
+<h1>probability and reverse probability estimation:</h1><br>
+<h2>probability estimation</h2>
+<blockquote><blockquote><p><strong>p1% * p2% * p3% * … * pn%</strong></p></blockquote>
+</blockquote><h2>reverse probability estimation</h2>
+<blockquote><blockquote><p><strong>(100-p1)% * (100-p2)% * (100-p3)% * … * (100-pn)%</strong></p></blockquote>
+</blockquote>
+<h2>X picks win/lose</h2>
+<h2>probability estimation / number of estimations</h2>
+<blockquote><blockquote><p><strong>(p1% * p2% * p3% * … * pn%) / n</strong></p></blockquote>
+</blockquote><h2>reverse probability estimation / number of estimations</h2>
+<blockquote><blockquote><p><strong>((100-p1)% * (100-p2)% * (100-p3)% * … * (100-pn)%) / n</strong></p></blockquote>
+</blockquote>
+<h2>expected value of a bet</h2>
+<blockquote><blockquote><p><strong>Expected value = wager + (expected win – expected loss)</strong></p></blockquote>
+<blockquote><p><strong>Expected value = 1 + ((0.5 x 1) – (0.5 x 0.98)) => 1.01</strong></p></blockquote>
+<blockquote><blockquote><p>0.5 is the probability of the event to happen (a coin flip)</p></blockquote></blockquote></blockquote>
+
+<strong>GREX'S HOME</strong>
+<p><a href="http://forum.punterslounge.com/threads/90190-Grex-s-HOMES-298-bets-14-3-yield">http://forum.punterslounge.com/threads/90190-Grex-s-HOMES-298-bets-14-3-yield</a><br>
+I have tried, tested and failed with a few of my systems on this Forum in the past. But, now I’m going to make another attempt to show consistent (but unremarkable) profit….. after all, that’s what the game is all about.The system has 2 elements. First, bets are placed on short-odds home favourites. Nothing new, you say…. of course, simply betting on home favourites at odds of 1.4 is never going to make you a profit.However, I did a lot of back-testing with data from the magnificent football-data site and found that betting at level stakes on home team odds of between 1.2 and 1.6 (Bet365 odds) gave you the best results – there was one amazing run of 24 wins  in 2005-06 Premier League season.Further analysis revealed that the English Premiership and Italy Serie A are the best performers…. perhaps because both leagues have a top core of 4 to 5 teams who have made an art-form out of consistently winning their home matches.I know the “value bets” pundits will be tearing their hair out….. you can never get value bets on the likes of Arsenal, , Man United, AC Milan, Inter etc. But just wait until you see the second element of the system…. the Staking Plan…. then you’ll be tearing your hair out even more!The Staking Plan is based on even return per bet i.e your stake at odds of 1.2 will be double your stake at odds of 1.4. But, wait for it, it includes a “loss recovery” system. I know….“never works…”, “you will always go bust eventually…”. However, this is a very conservative or mild loss recovery system – if you have a losing bet, you try to recover a percentage of the losses on the next round of bets. If you lose again, you write-off the losses and start again.I have back-tested the system over 6 seasons and it has consistently produced yields of between 8% and 12%. Not very dramatic, but better than a kick in the teeth.So to summarise:1.selections will be on Premier League and Serie A matches with home team odds of between 1.2 and 1.6 (published Bet365 odds)2.the initial bank will be £1,000 with stakes calculated to return 1% of the running bank3.when a loss occurs, the stakes on the next round of matches will be increased by a “secret” factor, in an attempt to win back some of the previous loss4.if a second consecutive loss(es) occurs, the loss will be written-off, and the stakes will return to achieve a profit of 1% of the running bank.One final rule… don’t start the system until 5 matches of the season have been played. Serie A still has 2 more rounds to go, however, the English Premiership has now reached that target. So the first selections will be on this weekend’s EPL matches and, surprise surprise, it looks as though Arsenal, , Man United and Aston Villa  will qualify.I’ll be back later to confirm……. REMEMBER…. this is only a paper trial.
+</p>
+
+
+<strong>JTW1 H2H</strong>
+<p><a href="http://forum.punterslounge.com/threads/44576-Head-to-Head-Meetings">http://forum.punterslounge.com/threads/44576-Head-to-Head-Meetings</a>
+
+Ok if this is going to work i really need to keep my discipline and that's something i've not done since starting up again , selecting games with too few h2h's and also under my 1.6 odds limit .Apologies to those who may have lost on a couple of these picks Rule 1 - odds MUST be between 1.6 and 2.5Rule 2 - There has to have been at least 4 recent h2h's in the corresponding fixture with the HOME side winning a significant number of historic h2h's.Rule 3 - Selections must have had a decent run of results in their last 5 home's ..ie won a significant number or/and drawn or lost by a narrow margin goal to superior opposition.
+<br><br>
+
+<a href="http://forum.punterslounge.com/threads/22781-UNDER-2-5-goals-using-previous-results/page37">http://forum.punterslounge.com/threads/22781-UNDER-2-5-goals-using-previous-results/page37</a>
+<br>
+Hi Jtw, what do you believe is the most important part of this system, the H2H record, the amount of consecutive Home unders etc?
+And what cut off do you normally suggest, i.e would you go for a match that had 4/6 for consecutive Home,, Away and H2H unders?
+Congrats yet again on an inspring set of returns, Potdw
+
+<br>
+I believe both h2h record and Home unders are equally as important to the system.
+The cut-off for both h2h and Homes would be that 4/6 mark while i would allow aways one more game ie 3/6 max , as long one [or both] of the others are strong
+</p>
+
+<strong>BAIRN1 AWAY</strong>
+<p>
+<a href="https://www.evernote.com/shard/s4/sh/fed929aa-0d64-4b0f-bb30-1818f6c97ee3/f85b040814a8bf4f3ef4e07a0275c594">bairn1 explanation</a><br>
+The strength of the opposition isn't really taken into account - only the fact that they may have been getting better results recently than may have been expected based on their performance ratings.
+I've tried filtering the results down to either exclude teams with very high points ratings and very low points ratings, but neither appear to improve the overall results.<br>
+re: Hi there, For every team, i calculate a performance rating and a points rating and compare these. So if the away team's performance rating is significantly better than the home team's, but the away team's points rating is significantly worse, then i bet on an away win.<br>
+In the Coventy vs Leeds example, i had performance ratings of -0.45 vs -0.06 (the average i have is 0 and currently in the Championship, QPR are rated highest at 1.73, and Bristol City lowest at -2.28). Points ratings were 1.27 vs 0.96.
+Everything is mathematical, and i don't take into account team news, importance of match, gut instinct, or anything like that.
+Hope this makes sense!
+</p>
+
+
+<h2>integration of football data and stats into the black swan approach</h2>
+<p><strong>JTW1 H2H HOME + UNDER/OVER</strong></p>
+<p><strong>GREX HOME + STAKE PLAN</strong></p>
+<blockquote><blockquote><p>in case of bigger X2 percentages: <strong>BAIRN1 AWAY</strong></p></blockquote>
+</blockquote>
+<h2>predictive football data</h2>
+<p>adjust mixed percentage(s) accordingly, also taking into account percentages from websites such as scibet or betvirus.</p>
+
+<h2>statistic football data</h2>
+<p>check the incidence of 1X2's with tools such as betvirus tool and football-bet-data.co.uk, then weigh the mixed percentage(s).</p>
+
+<%
+require 'open-uri'
+
+def simulate_bets(days)
+  picks = []
+  days.each{
+    |date, day|
+    number_of_matches = day[0]
+    if number_of_matches >= 4
+      serie = []
+      matches = day[9].to_a
+      random_indexes = (0..(matches.length-1)).to_a.sample(4)
+      for index in random_indexes
+        serie << matches[index]
+      end
+      picks << serie
+    end
+  }
+  return picks
+end
+
+def bookie_percentages(oo, home_win_odds)
+	i = 0
+	i_h = 0
+	i_a = 0
+	n = 0
+	h = 0
+	d = 0
+	d_h = 0
+	d_a = 0
+	a = 0
+	tot_i = 0
+	tot_i_h = 0
+	tot_i_a = 0
+	tot_n = 0
+	tot_h = 0
+	tot_d = 0
+	tot_d_h = 0
+	tot_d_a = 0
+	tot_a = 0
+	min_odds = home_win_odds
+	max_odds = home_win_odds + 0.05
+	date_array = []
+	date_hash = {}
+	2.upto(13931) do |line|
+		date = oo.cell(line,'A')
+		home = oo.cell(line,'B')
+		away = oo.cell(line,'C')
+		h_score = oo.cell(line,'D')
+		a_score = oo.cell(line, 'E')
+		final_score = oo.cell(line, 'F')
+		result = oo.cell(line, 'G')
+		h_odds = oo.cell(line, 'H')
+		d_odds = oo.cell(line, 'I')
+		a_odds = oo.cell(line, 'J')
+		league = oo.cell(line, 'K')
+		if date
+			odds_array = [h_odds, d_odds, a_odds]
+			fav_odds = [h_odds, d_odds, a_odds].min
+			if odds_array.index(fav_odds) == 0
+				fav = "H"
+			elsif odds_array.index(fav_odds) == 1
+				fav = "D"
+			elsif odds_array.index(fav_odds) == 2
+				fav = "A"
+			end
+			#date_hash[date][0]: total number of matches
+			#date_hash[date][1]: number of right matches
+			#date_hash[date][2]: number of right home win predictions
+			#date_hash[date][3]: number of right away win predictions
+			#date_hash[date][4]: number of unexpected home wins
+			#date_hash[date][5]: number of unexpected draws
+			#date_hash[date][6]: number of unexpected draws with home favorite
+	  		#date_hash[date][7]: number of unexpected draws with away favorite
+	  		#date_hash[date][8]: number of unexpected away wins
+	  		#date_hash[date][9]: hash with matches of the day
+	  		if date_array.index(date)
+		  		if fav_odds >= min_odds && fav_odds <= max_odds
+			  		match_name = home + " vs " + away
+			  		n = n + 1
+			  		tot_n = tot_n + 1
+			  		date_hash[date][0] = n
+			  		if fav == result
+				  		i = i + 1
+				  		tot_i = tot_i + 1
+				  		date_hash[date][1] = i
+				  		if fav == "H"
+					  		i_h = i_h + 1
+					  		tot_i_h = tot_i_h + 1
+					  		date_hash[date][2] = i_h
+					  		date_hash[date][9] = date_hash[date][9].merge({match_name => ["H", "H"]})
+					  	elsif fav == "A"
+					  		i_a = i_a + 1
+					  		tot_i_a = tot_i_a + 1
+					  		date_hash[date][3] = i_a
+					  		date_hash[date][9] = date_hash[date][9].merge({match_name => ["A", "A"]})
+					  	end
+					elsif fav != result && result == "H"
+						h = h + 1
+						tot_h = tot_h + 1
+						date_hash[date][4] = h
+						date_hash[date][9] = date_hash[date][9].merge({match_name => ["A", "H"]})
+					elsif fav != result && result == "D"
+						d = d + 1
+						tot_d = tot_d + 1
+						date_hash[date][5] = d
+						if fav == "H"
+							d_h = d_h + 1
+							tot_d_h = tot_d_h + 1
+							date_hash[date][6] = d_h
+							date_hash[date][9] = date_hash[date][9].merge({match_name => ["H", "D"]})
+						elsif fav == "A"
+							d_a = d_a + 1
+							tot_d_a = tot_d_a + 1
+							date_hash[date][7] = d_a
+							date_hash[date][9] = date_hash[date][9].merge({match_name => ["A", "D"]})
+						end
+						#p d_odds
+					elsif fav != result && result == "A"
+						a = a + 1
+						tot_a = tot_a + 1
+						date_hash[date][8] = a
+						date_hash[date][9] = date_hash[date][9].merge({match_name => ["H", "A"]})
+						#p a_odds
+					end
+				end
+			else
+				i = 0
+				i_h = 0
+				i_a = 0
+				n = 0
+				h = 0
+				d = 0
+				d_h = 0
+				d_a = 0
+				a = 0
+				if fav_odds >= min_odds && fav_odds <= max_odds
+					match_name = home + " vs " + away
+					n = n + 1
+					tot_n = tot_n + 1
+					date_array << date
+					date_hash.store(date, [n])
+					if fav == result
+						i = i + 1
+						tot_i = tot_i + 1
+						date_hash[date][1] = i
+						if fav == "H"
+							i_h = i_h + 1
+							tot_i_h = tot_i_h + 1
+							date_hash[date][2] = i_h
+							date_hash[date][9] = {match_name => ["H", "H"]}
+						elsif fav == "A"
+							i_a = i_a + 1
+							tot_i_a = tot_i_a + 1
+							date_hash[date][3] = i_a
+							date_hash[date][9] = {match_name => ["A", "A"]}
+						end
+					elsif fav != result && result == "H"
+						h = h + 1
+						tot_h = tot_h + 1
+						date_hash[date][4] = h
+						date_hash[date][9] = {match_name => ["A", "H"]}
+					elsif fav != result && result == "D"
+						d = d + 1
+						tot_d = tot_d + 1
+						date_hash[date][5] = d
+						if fav == "H"
+							d_h = d_h + 1
+							tot_d_h = tot_d_h + 1
+							date_hash[date][6] = d_h
+							date_hash[date][9] = {match_name => ["H", "D"]}
+						elsif fav == "A"
+							d_a = d_a + 1
+							tot_d_a = tot_d_a + 1
+							date_hash[date][7] = d_a
+							date_hash[date][9] = {match_name => ["A", "D"]}
+						end
+						#p d_odds
+					elsif fav != result && result == "A"
+						a = a + 1
+						tot_a = tot_a + 1
+						date_hash[date][8] = a
+						date_hash[date][9] = {match_name => ["H", "A"]}
+						#p a_odds
+					end
+				end
+			end
+		end
+	end
+	%>
+	
+	<%= "#{tot_i} right out of #{tot_n} >= #{min_odds} && <= #{max_odds}, out of which #{tot_i_h} home wins and #{tot_i_a} away wins" %><br>
+	<%= "#{tot_h} unexpected home wins" %><br>
+	<%= "#{tot_d} unexpected draws, out of which #{tot_d_h} were home favs and #{tot_d_a} were away favs" %><br>
+	<%= "#{tot_a} unexpected away wins" %><br>
+	<%= "BOOKIE PERCENTAGES:" %><br>
+	<%
+	right_home_win_perc = (tot_i_h.to_f/(tot_i_h + tot_d_h + tot_a).to_f) * 100
+	right_away_win_perc = (tot_i_a.to_f/(tot_i_a + tot_d_a + tot_h).to_f) * 100
+	%>
+	<%= "right home win predictions: #{right_home_win_perc}%" %><br>
+	<%= "right away win predictions: #{right_away_win_perc}%" %><br>
+	
+	<%
+	montecarlo_generated_series = simulate_bets(date_hash)
+	number_of_black_swans = 0
+	for serie in montecarlo_generated_series
+		success = false
+		for bet in serie
+			if bet[1][0] == bet[1][1]
+				success = true
+			end
+		end
+		if success == false
+			number_of_black_swans = number_of_black_swans + 1
+		end
+	end
+	return number_of_black_swans, right_home_win_perc, right_away_win_perc
+end
+
+#times = doc.xpath("//td[contains(@class, 'leftcell minwidth')]")
+#teams = doc.xpath("//td[contains(@class, 'label')]")
+#odds = doc.xpath("//td[contains(@class, 'odd')]")
+#http://stackoverflow.com/questions/8552534/how-can-i-iterate-through-child-nodes-of-a-particular-name-in-a-nokogiri-xml-doc
+#bet-list[2] is used to skip "Le scommesse top" section
+
+doc = Nokogiri::HTML(open("https://www.bwin.it/betViewIframe.aspx?SportID=4&bv=bb&selectedLeagues=0").read())
+if doc.xpath("//div[contains(@class, 'bet-list')]").size == 3
+ bets = doc.xpath("//div[contains(@class, 'bet-list')]")[2]
+elsif doc.xpath("//div[contains(@class, 'bet-list')]").size == 2
+ bets = doc.xpath("//div[contains(@class, 'bet-list')]")[1]
+end
+times = bets.search(".//td[contains(@class, 'leftcell minwidth')]")
+teams = bets.xpath(".//td[contains(@class, 'label')]")
+odds = bets.xpath(".//td[contains(@class, 'odd')]")
+
+i=0
+data = []
+buffer = []
+for team in teams do
+  if (i+1) % 3 != 0 || i == 0
+    buffer << team.text.strip
+    buffer << odds[i].text.to_f
+  else
+    buffer << team.text.strip
+    buffer << odds[i].text.to_f
+    buffer << times[i/3].text.strip
+    data << buffer
+    buffer = []
+  end
+  i = i+1
+end
+hashed_data = []
+hashed_buffer = {}
+for line in data
+  hashed_buffer.store("1", line[1])
+  hashed_buffer.store("x", line[3])
+  hashed_buffer.store("2", line[5])
+  hashed_buffer.store("team_1", line[0].strip)
+  hashed_buffer.store("team_2", line[4].strip)
+  hashed_buffer.store("time", line[6].strip)
+  hashed_data << hashed_buffer
+  hashed_buffer = {}
+end
+
+#oo = Openoffice.new("10-11-winter.ods")
+@oo.default_sheet = @oo.sheets.first
+picked_hour = 0
+picked_minute = 0
+matches_data = {}
+for match in hashed_data
+  home_team = match["team_1"]
+  away_team = match["team_2"]
+  home_win_odds = match["1"]
+  away_win_odds = match["2"]
+  draw_odds = match["x"]
+  time = match["time"]
+  hour = time.split(".")[0].to_i
+  minute = time.split(".")[1].to_i
+  if picked_hour == 0 || (picked_hour != 0 && (hour - picked_hour) >= 1 && (minute - picked_minute >= 0 || hour - picked_hour > 1))
+  	picked_hour = hour
+  	picked_minute = minute
+  elsif hour - picked_hour < 0
+  	#siamo in un altro giorno
+  	break
+  end
+  #se hour - picked_hour >= 0, allora i match sono tutti nello stesso giorno
+  if hour - picked_hour >= 0
+  	if home_win_odds < away_win_odds
+  		money_wanted = 5
+  		money_needed = money_wanted / (home_win_odds-1)
+  		%>
+  		<b><%= "#{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}" %></b><br>
+  		<%
+	  	if home_win_odds%0.05!=0
+  			home_win_odds = (home_win_odds * 10**1).round.to_f / 10**1
+  			perc = Stat.find :all, :select => "percentage", :conditions => ["min <= '#{home_win_odds}' AND max >= '#{home_win_odds+0.05}'"]
+  			number_of_black_swans, roo_home_perc, roo_away_perc = bookie_percentages(@oo, home_win_odds)
+  		%>
+  		<%=  "#{number_of_black_swans} black swan(s)." %><br>
+  		<%
+	  	else
+  			perc = Stat.find :all, :select => "percentage", :conditions => ["min <= '#{home_win_odds}' AND max >= '#{home_win_odds+0.05}'"]
+  			number_of_black_swans, roo_home_perc, roo_away_perc = bookie_percentages(@oo, home_win_odds)
+  		%>
+  		<%=  "#{number_of_black_swans} black swan(s)." %><br>
+  		<%
+	  	end
+	  	if perc[0] != nil
+	  	%>
+	  	<%= "tabella (partial) accuracy percentage: #{perc[0].percentage}%" %><br>
+	  	<%
+		  	mixed_percentage = (perc[0].percentage*100+roo_home_perc)/2
+		  	chance = mixed_percentage/(number_of_black_swans+1)
+		  	odds_weighted_chance = chance/home_win_odds
+		  	chance_weighted_convenience = chance/money_needed
+		  	#stores in an hash all the data about each match
+		  	match_name = "#{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}"
+		  	matches_data.store(match_name, [])
+		  	matches_data[match_name][0]= time
+		  	matches_data[match_name][1]= home_team
+		  	matches_data[match_name][2]= home_win_odds
+		  	matches_data[match_name][3]= draw_odds
+		  	matches_data[match_name][4]= away_team
+		  	matches_data[match_name][5]= away_win_odds
+		  	matches_data[match_name][6]= mixed_percentage
+		  	matches_data[match_name][7]= chance
+		  	matches_data[match_name][8]= odds_weighted_chance
+		  	matches_data[match_name][9]= chance_weighted_convenience
+		  	matches_data[match_name][10]= roo_home_perc
+		  	matches_data[match_name][11]= roo_away_perc
+		  	matches_data[match_name][12]= perc[0][0]
+		  	matches_data[match_name][13]= number_of_black_swans
+  		end
+  	%>
+  	mixed_percentage: <%= mixed_percentage %>%<br>
+  	chance: <%= chance %><br>
+  	odds_weighted_chance: <%= odds_weighted_chance %><br>
+  	money_needed: <%= money_needed %><br>
+  	chance_weighted_convenience: <%= chance_weighted_convenience %>
+  	<%
+  	else
+	%>
+  		<%= "tabella accuracy percentage not computed." %><br>
+  	<%
+	end
+	%>
+	
+	<br><br>
+	<%
+  else
+	%>
+	<b><%= "#{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}" %></b><br><br>
+	<%
+  end
+end
+
+%>
+
+<b>Chance_weighted_convenience:</b><br>
+<i>matches_data[match_name][1]= home_team</i><br>
+<i>matches_data[match_name][2]= home_win_odds</i><br>
+<i>matches_data[match_name][3]= draw_odds</i><br>
+<i>matches_data[match_name][4]= away_team</i><br>
+<i>matches_data[match_name][5]= away_win_odds</i><br>
+<i>matches_data[match_name][6]= mixed_percentage</i><br>
+<i>matches_data[match_name][7]= chance</i><br>
+<i>matches_data[match_name][8]= odds_weighted_chance</i><br>
+<i>matches_data[match_name][9]= chance_weighted_convenience</i><br>
+<i>matches_data[match_name][10]= roo_home_perc</i><br>
+<i>matches_data[match_name][11]= roo_away_perc</i><br>
+<i>matches_data[match_name][12]= perc[0][0]</i><br>
+<i>matches_data[match_name][13]= number_of_black_swans</i><br><br>
+
+<%
+#PROCESS MATCHES TRHOUGH matches_data HASH
+matches_chance_weighted_convenience_ordered_data = {}
+matches_chance_weighted_convenience_ordered_data = matches_data.sort_by {|key, value| value[9]} 
+%>
+
+<% 
+	matches_chance_weighted_convenience_ordered_data.each{|key, value|
+%>
+<%= value %><br><br>
+<%
+	} 
+%>
+
+
+<h1>BVR TOOL AUTOMATION</h1>
+
+<%
+
+doc = Nokogiri::HTML(open("http://betvirus.com/bvrates/").read())
+league = 0
+country = 0
+leagues_td = doc.xpath("//td[contains(@class, 'brdright')]")
+matches_td = doc.xpath("//td[contains(@class, 'tdivbvr')]")
+countries = []
+leagues = []
+matches = []
+forms = {}
+form_urls = []
+inout_form_urls = []
+#collects league codes
+for league in leagues_td
+	if league.children[1].attributes["href"] != nil
+		league_code = league.children[1].attributes["href"].value.strip.gsub("/leagueStats/", "").gsub("/", "").to_i
+		leagues << league_code
+	end
+end
+
+#collects match urls
+for match in matches_td
+	match_url = "http://betvirus.com" + match.children[0].attributes["href"].value
+	matches << match_url
+end
+
+
+#collects country codes for each match
+i = 0
+for match in matches
+	doc = Nokogiri::HTML(open("http://betvirus.com/leagueStats/#{leagues[i]}/").read())
+	div = doc.xpath("//div[contains(@class, 'rImg')]")
+	country_code = div[1].children[2].xpath(".//li")[4].children[3].attributes["href"].value.strip.gsub("/country/", "").gsub("/", "")
+	countries << country_code
+	i += 1
+end
+
+i=0
+for match in matches
+	buffer = []
+	doc = Nokogiri::HTML(open(match).read())
+	stats = doc.xpath("//td[contains(@class, 'lgStatsText')]")
+	form_1 = stats[5].text.strip.gsub("%","").to_i
+	form_x = stats[6].text.strip.gsub("%","").to_i
+	form_2 = stats[7].text.strip.gsub("%","").to_i
+	form_u = stats[8].text.strip.gsub("%","").to_i
+	form_o = stats[9].text.strip.gsub("%","").to_i
+	inout_form_1 = stats[10].text.strip.gsub("%","").to_i 
+	inout_form_x = stats[11].text.strip.gsub("%","").to_i 
+	inout_form_2 = stats[12].text.strip.gsub("%","").to_i 
+	inout_form_u = stats[13].text.strip.gsub("%","").to_i 
+	inout_form_o = stats[14].text.strip.gsub("%","").to_i 
+	buffer << form_1 << form_x << form_2 << form_u << form_o << inout_form_1 << inout_form_x << inout_form_2 << inout_form_u << inout_form_o
+	forms.store(i, buffer)
+	i += 1
+end
+
+i=0
+for match in matches
+	url = "http://betvirus.com/bvtool/?c=#{countries[i]}&l=#{leagues[i]}&t=3&m1=1&y1=2011&m2=7&y2=2012&e1s=#{forms[i][0]-2}&e1e=#{forms[i][0]+2}&exs=#{forms[i][1]-2}&exe=#{forms[i][1]+2}&e2s=#{forms[i][2]-2}&e2e=#{forms[i][2]+2}&eus=#{forms[i][3]-2}&eue=#{forms[i][3]+2}&eos=#{forms[i][4]-2}&eoe=#{forms[i][4]+2}"
+	form_urls << url
+	i += 1
+end
+
+i=0
+for match in matches
+	url = "http://betvirus.com/bvtool/?c=#{countries[i]}&l=#{leagues[i]}&t=4&m1=1&y1=2011&m2=7&y2=2012&e1s=#{forms[i][5]-2}&e1e=#{forms[i][5]+2}&exs=#{forms[i][6]-2}&exe=#{forms[i][6]+2}&e2s=#{forms[i][7]-2}&e2e=#{forms[i][7]+2}&eus=#{forms[i][8]-2}&eue=#{forms[i][8]+2}&eos=#{forms[i][9]-2}&eoe=#{forms[i][9]+2}"
+	inout_form_urls << url
+	i += 1
+end
+
+#ap leagues
+#ap countries
+#ap matches
+#ap forms
+#ap form_urls
+#ap inout_form_urls
+
+j = 1
+for url in inout_form_urls
+	i = 1
+	flag = 1
+	while(flag)
+		if i == 1
+			#do nothing
+		else
+			url = "#{url}&pageNumber=#{i}"
+			ap "page #{i}"
+		end
+		doc = Nokogiri::HTML(open(url).read())
+		nbsp = Nokogiri::HTML("&nbsp;").text
+		overall_table = doc.xpath("//table[contains(@id, 'prgTabTblN')]")
+		overall_table = overall_table.xpath(".//td[contains(@align, 'center')]")
+		overall_home_wins = overall_table[10].text.to_i
+		overall_draws = overall_table[11].text.to_i
+		overall_away_wins = overall_table[12].text.to_i
+		overall_unders = overall_table[13].text.to_i
+		overall_overs = overall_table[14].text.to_i
+		probs_from_match_eval = overall_table[15].text.strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").split("%")
+		overall_home_probs = probs_from_match_eval[0].to_i
+		overall_draw_probs = probs_from_match_eval[1].to_i
+		overall_away_probs = probs_from_match_eval[2].to_i
+		overall_under_probs = probs_from_match_eval[3].to_i
+		overall_over_probs = probs_from_match_eval[4].to_i
+		if i == 1
+%>
+			<%=j%> &nbsp
+			<a href=<%=url%>><%=url%></a><br>
+			Overall Home Wins: <%= p overall_home_wins %><br>
+			Overall Draws: <%= p overall_draws %><br>
+			Overall Away Wins: <%= p overall_away_wins %><br>
+			Overall Unders: <%= p overall_unders %><br>
+			Overall Overs: <%= p overall_overs %><br>
+			Overall Home Win Probabilities: <%= p overall_home_probs %><br>
+			Overall Draw Probabilities: <%= p overall_draw_probs %><br>
+			Overall Away Win Probabilities: <%= p overall_away_probs %><br>
+			Overall Under Probabilities: <%= p overall_under_probs %><br>
+			Overall Over Probabilities: <%= p overall_over_probs %><br><br>
+<%
+		j = j+1
+		end
+
+		maineval_div = doc.xpath("//div[contains(@id, 'mainEvalq')]")
+		rows = maineval_div.xpath(".//tr").drop(2)
+		rows.each do |row|
+			begin
+ 				row_array = row.text.strip.gsub(/\s+/, " ").gsub(nbsp, " ").split("%")
+ 				size = row_array[0].size
+ 				home_probs =  row.text.strip.gsub(/\s+/, " ").gsub(nbsp, " ").split("%")[0][(size - 2)..(size)].to_i
+ 				draw_probs = row_array[1].strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").to_i
+ 				away_probs = row_array[2].strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").to_i
+ 				under_probs = row_array[3].strip.gsub(/\s+/, "").gsub(nbsp, "").to_i
+ 				over_probs = row_array[4].strip.gsub(/\s+/, "").gsub(nbsp, "").delete("-").to_i
+ 				home_goals = 0
+ 				away_goals = 0
+ 				home_odds = 0
+ 				draw_odds = 0
+ 				away_odds = 0
+ 				if row_array[5].size < 15
+ 					#process for score only matches
+ 					home_goals = row_array[5].split("-")[0].strip.to_i
+ 					away_goals = row_array[5].split("-")[1].strip.to_i
+ 				else
+ 					home_odds = row_array[5].strip.split(" ")[0].to_f
+ 					draw_odds = row_array[5].strip.split(" ")[1].to_f
+ 					away_odds = row_array[5].strip.split(" ")[2].to_f
+ 					home_goals = row_array[5].strip.split(" ")[3].to_i
+ 					away_goals = row_array[5].strip.split(" ")[5].strip.delete("-").to_i
+ 				end
+ 				#ap home_probs
+ 				#ap draw_probs
+ 				#ap away_probs
+ 				#ap under_probs
+ 				#ap over_probs
+ 				#ap home_odds
+ 				#ap draw_odds
+ 				#ap away_odds
+ 				#ap home_goals
+ 				#ap away_goals
+ 				#p "----------"
+ 			rescue
+ 				#when we arrive to the tr where we have next page, an exception is thrown, and we handle it increasing the counter of the page
+ 				if row_array[0] != nil
+ 					last_page = row_array[0].split(" ")[3].to_i
+ 					if i+1 <= last_page
+ 						flag = 1
+ 						i += 1
+ 					else
+ 						flag = false
+ 					end
+ 				else
+ 					flag = false
+ 				end
+ 			end 
+ 		end
+ 	end
+end
+%>
+
+
+
+
+
+
+<h1>FBDATA TOOL AUTOMATION</h1>
+<%
+
+a = Mechanize.new{ |agent|
+  agent.user_agent_alias = 'Mac Safari'
+}
+
+a.get('http://www.football-bet-data.yows.co.uk/') do |page|
+  loggedin_page = page.form_with(:action => 'index.asp') do |f|
+     f.x1  = "gtardini@gmail.com"
+     f.x2 = "footballbetdatarokz"
+   end.click_button
+end
+
+home_odds = 0
+draw_odds = 0
+away_odds = 0
+
+doc = Nokogiri::HTML(a.post('http://www.football-bet-data.yows.co.uk/index.asp', {"AR1"=>"AR1","AU1"=>"AU1","AU2"=>"AU2","B1"=>"B1","B2"=>"B2","BR1"=>"BR1","BU1"=>"BU1","CH1"=>"CH1","CO1"=>"CO1","CR1"=>"CR1","CZ1"=>"CZ1","CZ2"=>"CZ2","D1"=>"D1","D2"=>"D2","D3"=>"D3","DE1"=>"DE1","DE2"=>"DE2","E0"=>"E0","E1"=>"E1","E2"=>"E2","E3"=>"E3","EC"=>"EC","FI1"=>"FI1","FI2"=>"FI2","FR1"=>"FR1","FR2"=>"FR2","FR3"=>"FR3","G1"=>"G1","G2"=>"G2","HU1"=>"HU1","IC1"=>"IC1","IR1"=>"IR1","IT1"=>"IT1","IT2"=>"IT2","IT3"=>"IT3","J1"=>"J1","J2"=>"J2","MX1"=>"MX1","N1"=>"N1","N2"=>"N2","NO1"=>"NO1","NO2"=>"NO2","PL1"=>"PL1","PL2"=>"PL2","PT1"=>"PT1","PT2"=>"PT2","RO1"=>"RO1","RU1"=>"RU1","SC0"=>"SC0","SC1"=>"SC1","SC2"=>"SC2","SC3"=>"SC3","SI1"=>"SI1","SL1"=>"SL1","SL2"=>"SL2","SP1"=>"SP1","SP2"=>"SP2","SU1"=>"SU1","SU2"=>"SU2","SW1"=>"SW1","SW2"=>"SW2","T1"=>"T1","T2"=>"T2","US1"=>"US1","UK1"=>"UK1","WA1"=>"WA1",
+
+"0-0"=>"0-0","1-0"=>"1-0","2-0"=>"2-0","3-0"=>"3-0","4-0"=>"4-0","5-0"=>"5-0","0-1"=>"0-1","1-1"=>"1-1","2-1"=>"2-1","3-1"=>"3-1","4-1"=>"4-1","5-1"=>"5-1","0-2"=>"0-2","1-2"=>"1-2","2-2"=>"2-2","3-2"=>"3-2","4-2"=>"4-2","5-2"=>"5-2","0-3"=>"0-3","1-3"=>"1-3","2-3"=>"2-3","3-3"=>"3-3","4-3"=>"4-3","5-3"=>"5-3","0-4"=>"0-4","1-4"=>"1-4","2-4"=>"2-4","3-4"=>"3-4","4-4"=>"4-4","5-4"=>"5-4","0-5"=>"0-5","1-5"=>"1-5","2-5"=>"2-5","3-5"=>"3-5","4-5"=>"4-5","5-5"=>"5-5",
+
+"H"=>"H","D"=>"D","A"=>"A",
+
+"0"=>"0","1"=>"1","2"=>"2","3"=>"3","4"=>"4","5"=>"5","6"=>"6","7"=>"7","8"=>"8","9"=>"9","10"=>"10","1-1.25Pho"=>"1-1.25","1.26-1.50Pho"=>"1.26-1.50","1.51-1.80Pho"=>"1.51-1.80","1.81-2.10Pho"=>"1.81-2.10","2.11-2.50Pho"=>"2.11-2.50","2.51-3.00Pho"=>"2.51-3.00","3.01-4.00Pho"=>"3.01-4.00","4.01-5.00Pho"=>"4.01-5.00","5.01-6.00Pho"=>"5.01-6.00","6.01-7.00Pho"=>"6.01-7.00","7.01-100Pho"=>"7.01-100","1-3.45Pdo"=>"1-3.45","3.46-3.69Pdo"=>"3.46-3.69","3.70-3.99Pdo"=>"3.70-3.99","4.00-4.50Pdo"=>"4.00-4.50","4.51-5.00Pdo"=>"4.51-5.00","5.01-5.50Pdo"=>"5.01-5.50","5.51-6.00Pdo"=>"5.51-6.00","6.01-7.00Pdo"=>"6.01-7.00","7.01-8.00Pdo"=>"7.01-8.00","8.01-10.00Pdo"=>"8.01-10.00","10.01-100Pdo"=>"10.01-100","1-1.25Pao"=>"1-1.25","1.26-1.50Pao"=>"1.26-1.50","1.51-1.80Pao"=>"1.51-1.80","1.81-2.10Pao"=>"1.81-2.10","2.11-2.50Pao"=>"2.11-2.50","2.51-3.00Pao"=>"2.51-3.00","3.01-4.00Pao"=>"3.01-4.00","4.01-5.00Pao"=>"4.01-5.00","5.01-6.00Pao"=>"5.01-6.00","6.01-7.00Pao"=>"6.01-7.00","7.01-100Pao"=>"7.01-100","1-1.20Pggo"=>"1-1.20","1.21-1.40Pggo"=>"1.21-1.40","1.41-1.60Pggo"=>"1.41-1.60","1.61-1.80Pggo"=>"1.61-1.80","1.81-2.00Pggo"=>"1.81-2.00","2.01-2.20Pggo"=>"2.01-2.20","2.21-2.40Pggo"=>"2.21-2.40","2.41-2.60Pggo"=>"2.41-2.60","2.61-2.80Pggo"=>"2.61-2.80","2.81-3.00Pggo"=>"2.81-3.00","3.01-100Pggo"=>"3.01-100","1-1.50Pu25o"=>"1-1.50","1.51-1.60Pu25o"=>"1.51-1.60","1.61-1.70Pu25o"=>"1.61-1.70","1.71-1.80Pu25o"=>"1.71-1.80","1.81-1.90Pu25o"=>"1.81-1.90","1.91-2.20Pu25o"=>"1.91-2.20","2.21-2.40Pu25o"=>"2.21-2.40","2.41-2.60Pu25o"=>"2.41-2.60","2.61-2.80Pu25o"=>"2.61-2.80","2.81-3.00Pu25o"=>"2.81-3.00","3.01-100Pu25o"=>"3.01-100","1-1.50Po25o"=>"1-1.50","1.51-1.60Po25o"=>"1.51-1.60","1.61-1.70Po25o"=>"1.61-1.70","1.71-1.80Po25o"=>"1.71-1.80","1.81-1.90Po25o"=>"1.81-1.90","1.91-2.20Po25o"=>"1.91-2.20","2.21-2.40Po25o"=>"2.21-2.40","2.41-2.60Po25o"=>"2.41-2.60","2.61-2.80Po25o"=>"2.61-2.80","2.81-3.00Po25o"=>"2.81-3.00","3.01-100Po25o"=>"3.01-100",
+
+"0-1.25Aho"=>"0-1.25","1.26-1.50Aho"=>"1.26-1.50","1.51-1.80Aho"=>"1.51-1.80","1.81-2.10Aho"=>"1.81-2.10","2.11-2.50Aho"=>"2.11-2.50","2.51-3.00Aho"=>"2.51-3.00","3.01-4.00Aho"=>"3.01-4.00","4.01-5.00Aho"=>"4.01-5.00","5.01-6.00Aho"=>"5.01-6.00","6.01-7.00Aho"=>"6.01-7.00","7.01-100Aho"=>"7.01-100",
+
+"0-3.45Ado"=>"0-3.45","3.46-3.69Ado"=>"3.46-3.69","3.70-3.99Ado"=>"3.70-3.99","4.00-4.50Ado"=>"4.00-4.50","4.51-5.00Ado"=>"4.51-5.00","5.01-5.50Ado"=>"5.01-5.50","5.51-6.00Ado"=>"5.51-6.00","6.01-7.00Ado"=>"6.01-7.00","7.01-8.00Ado"=>"7.01-8.00","8.01-10.00Ado"=>"8.01-10.00","10.01-100Ado"=>"10.01-100",
+
+"0-1.25Aao"=>"0-1.25","1.26-1.50Aao"=>"1.26-1.50","1.51-1.80Aao"=>"1.51-1.80","1.81-2.10Aao"=>"1.81-2.10","2.11-2.50Aao"=>"2.11-2.50","2.51-3.00Aao"=>"2.51-3.00","3.01-4.00Aao"=>"3.01-4.00","4.01-5.00Aao"=>"4.01-5.00","5.01-6.00Aao"=>"5.01-6.00","6.01-7.00Aao"=>"6.01-7.00","7.01-100Aao"=>"7.01-100",
+
+"2011"=>"2011","2012"=>"2012","rDate"=>"tod","stage"=>"2"}).content)
+
+table = doc.xpath("//table[contains(@id, 'table-3')]")
+rows = table.xpath(".//tr").drop(1)
+matches = {}
+i=0
+for row in rows
+  buffer = []
+  date = row.children[0].text
+  league = row.children[1].text.strip
+  home_team = row.children[2].text
+  away_team = row.children[3].text
+  h_odds = row.children[9].text.strip.to_f
+  d_odds = row.children[10].text.strip.to_f
+  a_odds = row.children[11].text.strip.to_f
+  cs_odds = row.children[12].text.strip.to_f
+  cs_prediction = row.children[13].text
+  prediction = row.children[14].text
+  goals_prediction = row.children[15].text.strip.to_i
+  pred_h_odds = row.children[16].text.strip.to_f
+  pred_d_odds = row.children[17].text.strip.to_f
+  pred_a_odds = row.children[18].text.strip.to_f
+  pred_gg_odds = row.children[19].text.strip.to_f
+  buffer << date << league << home_team << away_team << h_odds << d_odds << a_odds << cs_odds << cs_prediction << prediction << goals_prediction << pred_h_odds << pred_d_odds << pred_a_odds << pred_gg_odds
+  matches.store(i, buffer)
+  i += 1
+end
+
+i = 0
+for match in matches
+  league = match[1][1]
+  home_odds = match[1][4]
+  draw_odds = match[1][5]
+  away_odds = match[1][6]
+  home_team = match[1][2]
+  away_team = match[1][3]
+  post_data = {"#{league}"=>"#{league}",
+  "0-0"=>"0-0","1-0"=>"1-0","2-0"=>"2-0","3-0"=>"3-0","4-0"=>"4-0","5-0"=>"5-0","0-1"=>"0-1","1-1"=>"1-1","2-1"=>"2-1","3-1"=>"3-1","4-1"=>"4-1","5-1"=>"5-1","0-2"=>"0-2","1-2"=>"1-2","2-2"=>"2-2","3-2"=>"3-2","4-2"=>"4-2","5-2"=>"5-2","0-3"=>"0-3","1-3"=>"1-3","2-3"=>"2-3","3-3"=>"3-3","4-3"=>"4-3","5-3"=>"5-3","0-4"=>"0-4","1-4"=>"1-4","2-4"=>"2-4","3-4"=>"3-4","4-4"=>"4-4","5-4"=>"5-4","0-5"=>"0-5","1-5"=>"1-5","2-5"=>"2-5","3-5"=>"3-5","4-5"=>"4-5","5-5"=>"5-5",
+  "H"=>"H","D"=>"D","A"=>"A",
+  "0"=>"0","1"=>"1","2"=>"2","3"=>"3","4"=>"4","5"=>"5","6"=>"6","7"=>"7","8"=>"8","9"=>"9","10"=>"10",
+  "1-1.25Pho"=>"1-1.25","1.26-1.50Pho"=>"1.26-1.50","1.51-1.80Pho"=>"1.51-1.80","1.81-2.10Pho"=>"1.81-2.10","2.11-2.50Pho"=>"2.11-2.50","2.51-3.00Pho"=>"2.51-3.00","3.01-4.00Pho"=>"3.01-4.00","4.01-5.00Pho"=>"4.01-5.00","5.01-6.00Pho"=>"5.01-6.00","6.01-7.00Pho"=>"6.01-7.00","7.01-100Pho"=>"7.01-100",
+  "1-3.45Pdo"=>"1-3.45","3.46-3.69Pdo"=>"3.46-3.69","3.70-3.99Pdo"=>"3.70-3.99","4.00-4.50Pdo"=>"4.00-4.50","4.51-5.00Pdo"=>"4.51-5.00","5.01-5.50Pdo"=>"5.01-5.50","5.51-6.00Pdo"=>"5.51-6.00","6.01-7.00Pdo"=>"6.01-7.00","7.01-8.00Pdo"=>"7.01-8.00","8.01-10.00Pdo"=>"8.01-10.00","10.01-100Pdo"=>"10.01-100",
+  "1-1.25Pao"=>"1-1.25","1.26-1.50Pao"=>"1.26-1.50","1.51-1.80Pao"=>"1.51-1.80","1.81-2.10Pao"=>"1.81-2.10","2.11-2.50Pao"=>"2.11-2.50","2.51-3.00Pao"=>"2.51-3.00","3.01-4.00Pao"=>"3.01-4.00","4.01-5.00Pao"=>"4.01-5.00","5.01-6.00Pao"=>"5.01-6.00","6.01-7.00Pao"=>"6.01-7.00","7.01-100Pao"=>"7.01-100",
+  "1-1.20Pggo"=>"1-1.20","1.21-1.40Pggo"=>"1.21-1.40","1.41-1.60Pggo"=>"1.41-1.60","1.61-1.80Pggo"=>"1.61-1.80","1.81-2.00Pggo"=>"1.81-2.00","2.01-2.20Pggo"=>"2.01-2.20","2.21-2.40Pggo"=>"2.21-2.40","2.41-2.60Pggo"=>"2.41-2.60","2.61-2.80Pggo"=>"2.61-2.80","2.81-3.00Pggo"=>"2.81-3.00","3.01-100Pggo"=>"3.01-100",
+  "1-1.50Pu25o"=>"1-1.50","1.51-1.60Pu25o"=>"1.51-1.60","1.61-1.70Pu25o"=>"1.61-1.70","1.71-1.80Pu25o"=>"1.71-1.80","1.81-1.90Pu25o"=>"1.81-1.90","1.91-2.20Pu25o"=>"1.91-2.20","2.21-2.40Pu25o"=>"2.21-2.40","2.41-2.60Pu25o"=>"2.41-2.60","2.61-2.80Pu25o"=>"2.61-2.80","2.81-3.00Pu25o"=>"2.81-3.00","3.01-100Pu25o"=>"3.01-100",
+  "1-1.50Po25o"=>"1-1.50","1.51-1.60Po25o"=>"1.51-1.60","1.61-1.70Po25o"=>"1.61-1.70","1.71-1.80Po25o"=>"1.71-1.80","1.81-1.90Po25o"=>"1.81-1.90","1.91-2.20Po25o"=>"1.91-2.20","2.21-2.40Po25o"=>"2.21-2.40","2.41-2.60Po25o"=>"2.41-2.60","2.61-2.80Po25o"=>"2.61-2.80","2.81-3.00Po25o"=>"2.81-3.00","3.01-100Po25o"=>"3.01-100",
+  "2011"=>"2011","2012"=>"2012","rDate"=>"all","stage"=>"2"}
+
+  if home_odds >= 1 && home_odds <= 1.25
+    post_data = post_data.merge "0-1.25Aho"=>"0-1.25"
+  elsif home_odds >= 1.26 && home_odds <= 1.50
+    post_data = post_data.merge  "1.26-1.50Aho"=>"1.26-1.50"  
+  elsif home_odds >= 1.51 && home_odds <= 1.80
+    post_data = post_data.merge  "1.51-1.80Aho"=>"1.51-1.80"  
+  elsif home_odds >= 1.81 && home_odds <= 2.10
+    post_data = post_data.merge  "1.81-2.10Aho"=>"1.81-2.10"  
+  elsif home_odds >= 2.11 && home_odds <= 2.50
+    post_data = post_data.merge  "2.11-2.50Aho"=>"2.11-2.50"  
+  elsif home_odds >= 2.51 && home_odds <= 3.00
+    post_data = post_data.merge  "2.51-3.00Aho"=>"2.51-3.00"  
+  elsif home_odds >= 3.01 && home_odds <= 4.00
+    post_data = post_data.merge  "3.01-4.00Aho"=>"3.01-4.00"  
+  elsif home_odds >= 4.01 && home_odds <= 5.00
+    post_data = post_data.merge  "4.01-5.00Aho"=>"4.01-5.00"  
+  elsif home_odds >= 5.01 && home_odds <= 6.00
+    post_data = post_data.merge  "5.01-6.00Aho"=>"5.01-6.00"  
+  elsif home_odds >= 6.01 && home_odds <= 7.00
+    post_data = post_data.merge  "6.01-7.00Aho"=>"6.01-7.00"  
+  elsif home_odds >= 7.01 && home_odds <= 100
+    post_data = post_data.merge  "7.01-100Aho"=>"7.01-100"  
+  end
+
+  if draw_odds >= 0 && draw_odds <= 3.45
+    post_data = post_data.merge  "0-3.45Ado"=>"0-3.45"  
+  elsif draw_odds >= 3.46 && draw_odds <= 3.69
+    post_data = post_data.merge  "3.46-3.69Ado"=>"3.46-3.69"  
+  elsif draw_odds >= 3.70 && draw_odds <= 3.99
+    post_data = post_data.merge  "3.70-3.99Ado"=>"3.70-3.99"  
+  elsif draw_odds >= 4.00 && draw_odds <= 4.50
+    post_data = post_data.merge  "4.00-4.50Ado"=>"4.00-4.50"  
+  elsif draw_odds >= 4.51 && draw_odds <= 5.00
+    post_data = post_data.merge  "4.51-5.00Ado"=>"4.51-5.00"  
+  elsif draw_odds >= 5.01 && draw_odds <= 5.50
+    post_data = post_data.merge  "5.01-5.50Ado"=>"5.01-5.50"  
+  elsif draw_odds >= 5.51 && draw_odds <= 6.00
+    post_data = post_data.merge  "5.51-6.00Ado"=>"5.51-6.00"  
+  elsif draw_odds >= 6.01 && draw_odds <= 7.00
+    post_data = post_data.merge  "6.01-7.00Ado"=>"6.01-7.00"  
+  elsif draw_odds >= 7.01 && draw_odds <= 8.00
+    post_data = post_data.merge  "7.01-8.00Ado"=>"7.01-8.00"  
+  elsif draw_odds >= 8.01 && draw_odds <= 10.00
+    post_data = post_data.merge  "8.01-10.00Ado"=>"8.01-10.00"  
+  elsif draw_odds >= 10.01 && draw_odds <= 100
+    post_data = post_data.merge  "10.01-100Ado"=>"10.01-100"  
+  end
+
+  if away_odds >= 1 && away_odds <= 1.25
+    post_data = post_data.merge  "0-1.25Aao"=>"0-1.25"  
+  elsif away_odds >= 1.26 && away_odds <= 1.50
+    post_data = post_data.merge  "1.26-1.50Aao"=>"1.26-1.50"  
+  elsif away_odds >= 1.51 && away_odds <= 1.80
+    post_data = post_data.merge  "1.51-1.80Aao"=>"1.51-1.80"  
+  elsif away_odds >= 1.81 && away_odds <= 2.10
+    post_data = post_data.merge  "1.81-2.10Aao"=>"1.81-2.10"  
+  elsif away_odds >= 2.11 && away_odds <= 2.50
+    post_data = post_data.merge  "2.11-2.50Aao"=>"2.11-2.50"  
+  elsif away_odds >= 2.51 && away_odds <= 3.00
+    post_data = post_data.merge  "2.51-3.00Aao"=>"2.51-3.00"  
+  elsif away_odds >= 3.01 && away_odds <= 4.00
+    post_data = post_data.merge  "3.01-4.00Aao"=>"3.01-4.00"  
+  elsif away_odds >= 4.01 && away_odds <= 5.00
+    post_data = post_data.merge  "4.01-5.00Aao"=>"4.01-5.00"  
+  elsif away_odds >= 5.01 && away_odds <= 6.00
+    post_data = post_data.merge  "5.01-6.00Aao"=>"5.01-6.00"  
+  elsif away_odds >= 6.01 && away_odds <= 7.00
+    post_data = post_data.merge  "6.01-7.00Aao"=>"6.01-7.00"  
+  elsif away_odds >= 7.01 && away_odds <= 100
+    post_data = post_data.merge  "7.01-100Aao"=>"7.01-100"  
+  end
+ 
+%>
+    <b><%= home_team %> vs <%= away_team %></b><br>
+<%
+
+  doc = Nokogiri::HTML(a.post('http://www.football-bet-data.yows.co.uk/index.asp', post_data).content)
+  table = doc.xpath("//table[contains(@id, 'table-3')]")
+  rows = table.xpath(".//tr").drop(1)
+  for row in rows
+    buffer = []
+    date = row.children[0].text
+    league = row.children[1].text.strip
+    home_team = row.children[2].text
+    away_team = row.children[3].text
+    final_score = row.children[4].text
+    result = row.children[5].text
+    tot_goals = row.children[8].text.to_i
+    h_odds = row.children[9].text.strip.to_f
+    d_odds = row.children[10].text.strip.to_f
+    a_odds = row.children[11].text.strip.to_f
+    cs_odds = row.children[12].text.strip.to_f
+    cs_prediction = row.children[13].text
+    prediction = row.children[14].text
+    goals_prediction = row.children[15].text.strip.to_i
+    pred_h_odds = row.children[16].text.strip.to_f
+    pred_d_odds = row.children[17].text.strip.to_f
+    pred_a_odds = row.children[18].text.strip.to_f
+    pred_gg_odds = row.children[19].text.strip.to_f
+    buffer << date << league << home_team << away_team << final_score << result << tot_goals << h_odds << d_odds << a_odds << cs_odds << cs_prediction << prediction << goals_prediction << pred_h_odds << pred_d_odds << pred_a_odds << pred_gg_odds
+    #p buffer
+  end
+  #p "------------------"
+  overall_table = doc.xpath("//table[contains(@bordercolor, '#e5e5e5')]")
+  overall_rows = overall_table.xpath(".//tr")
+%>
+<%=
+  overall_rows.text
+%>
+<%
+  i += 1
+%>
+<br><br>
+<%
+end
+%>
+
+
+
+
+
+<br><br>
+<iframe src="http://scibet.com" width=900 height=500></iframe>
+<iframe src="http://betvirus.com/" width=900 height=500></iframe>
+<iframe src="http://www.football-bet-data.yows.co.uk/" width=900 height=400></iframe>
+<iframe src="http://www.whoscored.com/" width=900 height=500></iframe>
+<!--<iframe src="http://www.soccerstats.com/" width=800 height=400></iframe>-->
+<iframe src="http://www.betbrain.com/football" width=900 height=500></iframe>
+<iframe src="http://www.betexplorer.com/" width=900 height=500></iframe>
+<iframe src="http://www.betswelike.com" width=900 height=500></iframe>
+<iframe src="http://www.goldenbet.com/" width=900 height=500></iframe>
+<iframe src="http://www.bet-portal.net/en/prediction.html" width=900 height=500></iframe>
