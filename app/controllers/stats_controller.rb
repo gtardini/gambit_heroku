@@ -3,7 +3,7 @@ class StatsController < ApplicationController
   # GET /stats.json
   def index
     @stats = Stat.all
-    oo = Openoffice.new("Current.ods")
+    @oo = Openoffice.new("Current.ods")
     
     respond_to do |format|
       format.html # index.html.erb
