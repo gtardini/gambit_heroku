@@ -1,1 +1,1 @@
-ENV['ROO_TMP'] = "#{RAILS_ROOT}/tmp/"
+ENV['ROO_TMP'] = "#{Rails.root}/tmp/"
