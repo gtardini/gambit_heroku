@@ -1,4 +1,6 @@
 GambitHeroku::Application.routes.draw do
+  resources :stats
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

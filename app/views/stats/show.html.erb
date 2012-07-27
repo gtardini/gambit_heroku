@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Min:</b>
+  <%= @stat.min %>
+</p>
+
+<p>
+  <b>Max:</b>
+  <%= @stat.max %>
+</p>
+
+<p>
+  <b>Right:</b>
+  <%= @stat.right %>
+</p>
+
+<p>
+  <b>Draw:</b>
+  <%= @stat.draw %>
+</p>
+
+<p>
+  <b>Wrong:</b>
+  <%= @stat.wrong %>
+</p>
+
+<p>
+  <b>Percentage:</b>
+  <%= @stat.percentage %>
+</p>
+
+
+<%= link_to 'Edit', edit_stat_path(@stat) %> |
+<%= link_to 'Back', stats_path %>
