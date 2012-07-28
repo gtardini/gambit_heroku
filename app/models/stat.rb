@@ -8,6 +8,7 @@ class Stat < ActiveRecord::Base
 #bet-list[2] is used to skip "Le scommesse top" section
 
 doc = Nokogiri::HTML(open("https://www.bwin.it/betViewIframe.aspx?SportID=4&bv=bb&selectedLeagues=0").read())
+p doc
 if doc.xpath("//div[contains(@class, 'bet-list')]").size == 3
  bets = doc.xpath("//div[contains(@class, 'bet-list')]")[2]
 elsif doc.xpath("//div[contains(@class, 'bet-list')]").size == 2
