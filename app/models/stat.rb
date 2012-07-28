@@ -120,7 +120,7 @@ class Stat < ActiveRecord::Base
 	 matches_chance_weighted_convenience_ordered_data = {}
 	 matches_chance_weighted_convenience_ordered_data = matches_data.sort_by {|key, value| value[9]} 
 	 matches_chance_weighted_convenience_ordered_data.each{|key, value|
-		 value  
+		 p "#{value}"  
 	 } 
  
 	
