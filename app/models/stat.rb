@@ -109,6 +109,182 @@ class Stat < ActiveRecord::Base
 		else
 	 	end
 	 end
+	 
+	 #ORDERS MATCHES BY CONVENIENCE
+	 matches_chance_weighted_convenience_ordered_data = {}
+	 matches_chance_weighted_convenience_ordered_data = matches_data.sort_by {|key, value| value[9]} 
+	 matches_chance_weighted_convenience_ordered_data.each{|key, value|
+		 value  
+	 } 
+ 
+	
+	#BETVIRUS PART 
+	doc = Nokogiri::HTML(open("http://betvirus.com/bvrates/").read())
+ 	league = 0
+ 	country = 0
+ 	leagues_td = doc.xpath("//td[contains(@class, 'brdright')]")
+ 	matches_td = doc.xpath("//td[contains(@class, 'tdivbvr')]")
+ 	countries = []
+ 	leagues = []
+ 	matches = []
+ 	forms = {}
+ 	form_urls = []
+ 	inout_form_urls = []
+ 	#collects league codes
+ 	for league in leagues_td
+		if league.children[1].attributes["href"] != nil
+			league_code = league.children[1].attributes["href"].value.strip.gsub("/leagueStats/", "").gsub("/", "").to_i
+			leagues << league_code
+		end
+	end
+
+	#collects match urls
+	for match in matches_td
+		match_url = "http://betvirus.com" + match.children[0].attributes["href"].value
+		matches << match_url
+	end
+
+
+	#collects country codes for each match
+	i = 0
+	for match in matches
+		doc = Nokogiri::HTML(open("http://betvirus.com/leagueStats/#{leagues[i]}/").read())
+		div = doc.xpath("//div[contains(@class, 'rImg')]")
+		country_code = div[1].children[2].xpath(".//li")[4].children[3].attributes["href"].value.strip.gsub("/country/", "").gsub("/", "")
+		countries << country_code
+		i += 1
+	end
+
+	i=0
+	for match in matches
+		buffer = []
+		doc = Nokogiri::HTML(open(match).read())
+		stats = doc.xpath("//td[contains(@class, 'lgStatsText')]")
+		form_1 = stats[5].text.strip.gsub("%","").to_i
+		form_x = stats[6].text.strip.gsub("%","").to_i
+		form_2 = stats[7].text.strip.gsub("%","").to_i
+		form_u = stats[8].text.strip.gsub("%","").to_i
+		form_o = stats[9].text.strip.gsub("%","").to_i
+		inout_form_1 = stats[10].text.strip.gsub("%","").to_i 
+		inout_form_x = stats[11].text.strip.gsub("%","").to_i 
+		inout_form_2 = stats[12].text.strip.gsub("%","").to_i 
+		inout_form_u = stats[13].text.strip.gsub("%","").to_i 
+		inout_form_o = stats[14].text.strip.gsub("%","").to_i 
+		buffer << form_1 << form_x << form_2 << form_u << form_o << inout_form_1 << inout_form_x << inout_form_2 << inout_form_u << inout_form_o
+		forms.store(i, buffer)
+		i += 1
+	end
+
+	i=0
+	for match in matches
+		url = "http://betvirus.com/bvtool/?c=#{countries[i]}&l=#{leagues[i]}&t=3&m1=1&y1=2011&m2=7&y2=2012&e1s=#{forms[i][0]-2}&e1e=#{forms[i][0]+2}&exs=#{forms[i][1]-2}&exe=#{forms[i][1]+2}&e2s=#{forms[i][2]-2}&e2e=#{forms[i][2]+2}&eus=#{forms[i][3]-2}&eue=#{forms[i][3]+2}&eos=#{forms[i][4]-2}&eoe=#{forms[i][4]+2}"
+		form_urls << url
+		i += 1
+	end
+
+	i=0
+	for match in matches
+		url = "http://betvirus.com/bvtool/?c=#{countries[i]}&l=#{leagues[i]}&t=4&m1=1&y1=2011&m2=7&y2=2012&e1s=#{forms[i][5]-2}&e1e=#{forms[i][5]+2}&exs=#{forms[i][6]-2}&exe=#{forms[i][6]+2}&e2s=#{forms[i][7]-2}&e2e=#{forms[i][7]+2}&eus=#{forms[i][8]-2}&eue=#{forms[i][8]+2}&eos=#{forms[i][9]-2}&eoe=#{forms[i][9]+2}"
+		inout_form_urls << url
+		i += 1
+	end
+
+	j = 1
+	for url in inout_form_urls
+		i = 1
+		flag = 1
+		while(flag)
+			if i == 1
+				#do nothing
+			else
+				url = "#{url}&pageNumber=#{i}"
+				ap "page #{i}"
+			end
+			doc = Nokogiri::HTML(open(url).read())
+			nbsp = Nokogiri::HTML("&nbsp;").text
+			overall_table = doc.xpath("//table[contains(@id, 'prgTabTblN')]")
+			overall_table = overall_table.xpath(".//td[contains(@align, 'center')]")
+			overall_home_wins = overall_table[10].text.to_i
+			overall_draws = overall_table[11].text.to_i
+			overall_away_wins = overall_table[12].text.to_i
+			overall_unders = overall_table[13].text.to_i
+			overall_overs = overall_table[14].text.to_i
+			probs_from_match_eval = overall_table[15].text.strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").split("%")
+			overall_home_probs = probs_from_match_eval[0].to_i
+			overall_draw_probs = probs_from_match_eval[1].to_i
+			overall_away_probs = probs_from_match_eval[2].to_i
+			overall_under_probs = probs_from_match_eval[3].to_i
+			overall_over_probs = probs_from_match_eval[4].to_i
+			if i == 1
+				j  
+				p "Overall Home Wins: #{overall_home_wins}"
+				p  "Overall Draws: #{overall_draws}"
+				p "Overall Away Wins: #{overall_away_wins}"
+				p "Overall Unders: #{overall_unders}" 
+				p "Overall Overs: #{overall_overs}"
+				p "Overall Home Win Probabilities: #{overall_home_probs}" 
+				p "Overall Draw Probabilities: #{overall_draw_probs}"
+				p "Overall Away Win Probabilities: #{overall_away_probs}"
+				p "Overall Under Probabilities: #{overall_under_probs}"
+				p "Overall Over Probabilities: #{overall_over_probs}" 
+				j = j+1
+			end
+
+			maineval_div = doc.xpath("//div[contains(@id, 'mainEvalq')]")
+			rows = maineval_div.xpath(".//tr").drop(2)
+			rows.each do |row|
+				begin
+ 					row_array = row.text.strip.gsub(/\s+/, " ").gsub(nbsp, " ").split("%")
+ 					size = row_array[0].size
+ 					home_probs =  row.text.strip.gsub(/\s+/, " ").gsub(nbsp, " ").split("%")[0][(size - 2)..(size)].to_i
+ 					draw_probs = row_array[1].strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").to_i
+ 					away_probs = row_array[2].strip.gsub(/\s+/, "").delete("-").gsub(nbsp, "").to_i
+ 					under_probs = row_array[3].strip.gsub(/\s+/, "").gsub(nbsp, "").to_i
+ 					over_probs = row_array[4].strip.gsub(/\s+/, "").gsub(nbsp, "").delete("-").to_i
+ 					home_goals = 0
+ 					away_goals = 0
+ 					home_odds = 0
+ 					draw_odds = 0
+ 					away_odds = 0
+ 					if row_array[5].size < 15
+ 						#process for score only matches
+ 						home_goals = row_array[5].split("-")[0].strip.to_i
+ 						away_goals = row_array[5].split("-")[1].strip.to_i
+ 					else
+ 						home_odds = row_array[5].strip.split(" ")[0].to_f
+ 						draw_odds = row_array[5].strip.split(" ")[1].to_f
+ 						away_odds = row_array[5].strip.split(" ")[2].to_f
+ 						home_goals = row_array[5].strip.split(" ")[3].to_i
+ 						away_goals = row_array[5].strip.split(" ")[5].strip.delete("-").to_i
+ 					end
+ 					#ap home_probs
+ 					#ap draw_probs
+ 					#ap away_probs
+ 					#ap under_probs
+ 					#ap over_probs
+ 					#ap home_odds
+ 					#ap draw_odds
+ 					#ap away_odds
+ 					#ap home_goals
+ 					#ap away_goals
+ 					#p "----------"
+ 				rescue
+ 					#when we arrive to the tr where we have next page, an exception is thrown, and we handle it increasing the counter of the page
+ 					if row_array[0] != nil
+ 						last_page = row_array[0].split(" ")[3].to_i
+ 						if i+1 <= last_page
+ 							flag = 1
+ 							i += 1
+ 						else
+ 							flag = false
+ 						end
+ 					else
+ 						flag = false
+ 					end
+ 				end 
+ 			end
+ 		end
+ 	end 
    end
 end
 
