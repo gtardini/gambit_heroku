@@ -265,19 +265,16 @@ for url in inout_form_urls
 		overall_under_probs = probs_from_match_eval[3].to_i
 		overall_over_probs = probs_from_match_eval[4].to_i
 		if i == 1
- 
-			 j  &nbsp
-			<a href= url > url </a>
-			Overall Home Wins:   p overall_home_wins  
-			Overall Draws:   p overall_draws  
-			Overall Away Wins:   p overall_away_wins  
-			Overall Unders:   p overall_unders  
-			Overall Overs:   p overall_overs  
-			Overall Home Win Probabilities:   p overall_home_probs  
-			Overall Draw Probabilities:   p overall_draw_probs  
-			Overall Away Win Probabilities:   p overall_away_probs  
-			Overall Under Probabilities:   p overall_under_probs  
-			Overall Over Probabilities:   p overall_over_probs  
+			p overall_home_wins  
+			p overall_draws  
+			p overall_away_wins  
+			p overall_unders  
+			p overall_overs  
+			p overall_home_probs  
+			p overall_draw_probs  
+			p overall_away_probs  
+			p overall_under_probs  
+			p overall_over_probs  
  
 		j = j+1
 		end
