@@ -1,6 +1,7 @@
 class Stat < ActiveRecord::Base
 	def push_mail
 		oo = Openoffice.new("Current.ods")
+		doc = Nokogiri::HTML(open("https://www.bwin.it/betViewIframe.aspx?SportID=4&bv=bb&selectedLeagues=0").read())
 	end
 end
 
