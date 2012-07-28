@@ -131,8 +131,6 @@ for match in hashed_data
 end
 
  
-
-p Chance_weighted_convenience:
 p matches_data[match_name][1]= home_team
 p matches_data[match_name][2]= home_win_odds
 p matches_data[match_name][3]= draw_odds
