@@ -4,8 +4,112 @@ class Stat < ActiveRecord::Base
 	def push_mail
 		oo = Openoffice.new("Current.ods")
 		doc = Nokogiri::HTML(open("https://www.bwin.it/betViewIframe.aspx?SportID=4&bv=bb&selectedLeagues=0").read())
-		p doc
-	end
+		if doc.xpath("//div[contains(@class, 'bet-list')]").size == 3
+			bets = doc.xpath("//div[contains(@class, 'bet-list')]")[2]
+		elsif doc.xpath("//div[contains(@class, 'bet-list')]").size == 2
+			bets = doc.xpath("//div[contains(@class, 'bet-list')]")[1]
+		end
+		times = bets.search(".//td[contains(@class, 'leftcell minwidth')]")
+		teams = bets.xpath(".//td[contains(@class, 'label')]")
+		odds = bets.xpath(".//td[contains(@class, 'odd')]")
+
+		i=0
+		data = []
+		buffer = []
+		for team in teams do
+			if (i+1) % 3 != 0 || i == 0
+				buffer << team.text.strip
+				buffer << odds[i].text.to_f
+			else
+				buffer << team.text.strip
+				buffer << odds[i].text.to_f
+				buffer << times[i/3].text.strip
+				data << buffer
+				buffer = []
+			end
+			i = i+1
+		end
+		hashed_data = []
+		hashed_buffer = {}
+		for line in data
+			hashed_buffer.store("1", line[1])
+			hashed_buffer.store("x", line[3])
+			hashed_buffer.store("2", line[5])
+			hashed_buffer.store("team_1", line[0].strip)
+			hashed_buffer.store("team_2", line[4].strip)
+			hashed_buffer.store("time", line[6].strip)
+			hashed_data << hashed_buffer
+			hashed_buffer = {}
+		end
+
+		#oo = Openoffice.new("10-11-winter.ods")
+		oo.default_sheet = oo.sheets.first
+		picked_hour = 0
+		picked_minute = 0
+		matches_data = {}
+		for match in hashed_data
+			home_team = match["team_1"]
+			away_team = match["team_2"]
+			home_win_odds = match["1"]
+			away_win_odds = match["2"]
+			draw_odds = match["x"]
+			time = match["time"]
+			hour = time.split(".")[0].to_i
+			minute = time.split(".")[1].to_i
+			if picked_hour == 0 || (picked_hour != 0 && (hour - picked_hour) >= 1 && (minute - picked_minute >= 0 || hour - picked_hour > 1))
+				picked_hour = hour
+				picked_minute = minute
+			elsif hour - picked_hour < 0
+			#siamo in un altro giorno
+				break
+			end
+			#se hour - picked_hour >= 0, allora i match sono tutti nello stesso giorno
+			if hour - picked_hour >= 0
+				if home_win_odds < away_win_odds
+					money_wanted = 5
+					money_needed = money_wanted / (home_win_odds-1)
+					p "#{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}"
+						if home_win_odds%0.05!=0
+							home_win_odds = (home_win_odds * 10**1).round.to_f / 10**1
+							perc = Stat.find :all, :select => "percentage", :conditions => ["min <= '#{home_win_odds}' AND max >= '#{home_win_odds+0.05}'"]
+							number_of_black_swans, roo_home_perc, roo_away_perc = bookie_percentages(oo, home_win_odds)
+							p "#{number_of_black_swans} black swan(s)."  
+						else
+							perc = Stat.find :all, :select => "percentage", :conditions => ["min <= '#{home_win_odds}' AND max >= '#{home_win_odds+0.05}'"]
+							number_of_black_swans, roo_home_perc, roo_away_perc = bookie_percentages(oo, home_win_odds)
+							p "#{number_of_black_swans} black swan(s)."  
+						end
+						if perc[0] != nil
+							"tabella (partial) accuracy percentage: #{perc[0].percentage}%"  
+							mixed_percentage = (perc[0].percentage*100+roo_home_perc)/2
+							chance = mixed_percentage/(number_of_black_swans+1)
+							odds_weighted_chance = chance/home_win_odds
+							chance_weighted_convenience = chance/money_needed
+							#stores in an hash all the data about each match
+							match_name = "#{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}"
+							matches_data.store(match_name, [])
+							matches_data[match_name][0]= time
+							matches_data[match_name][1]= home_team
+							matches_data[match_name][2]= home_win_odds
+							matches_data[match_name][3]= draw_odds
+							matches_data[match_name][4]= away_team
+							matches_data[match_name][5]= away_win_odds
+							matches_data[match_name][6]= mixed_percentage
+							matches_data[match_name][7]= chance
+							matches_data[match_name][8]= odds_weighted_chance
+							matches_data[match_name][9]= chance_weighted_convenience
+							matches_data[match_name][10]= roo_home_perc
+							matches_data[match_name][11]= roo_away_perc
+							matches_data[match_name][12]= perc[0][0]
+							matches_data[match_name][13]= number_of_black_swans
+						end
+				else
+					p "tabella accuracy percentage not computed."  
+				end
+		else
+	 	end
+	 end
+   end
 end
 
 
@@ -203,8 +307,8 @@ def bookie_percentages(oo, home_win_odds)
 	  "#{tot_a} unexpected away wins"  
 	  "BOOKIE PERCENTAGES:"  
 	 
-	right_home_win_perc = (tot_i_h.to_f/(tot_i_h + tot_d_h + tot_a).to_f) * 100
-	right_away_win_perc = (tot_i_a.to_f/(tot_i_a + tot_d_a + tot_h).to_f) * 100
+	  right_home_win_perc = (tot_i_h.to_f/(tot_i_h + tot_d_h + tot_a).to_f) * 100
+	  right_away_win_perc = (tot_i_a.to_f/(tot_i_a + tot_d_a + tot_h).to_f) * 100
 	 
 	  "right home win predictions: #{right_home_win_perc}%"  
 	  "right away win predictions: #{right_away_win_perc}%"  
