@@ -80,7 +80,7 @@ class Stat < ActiveRecord::Base
 							p "#{number_of_black_swans} black swan(s)."  
 						end
 						if perc[0] != nil
-							"tabella (partial) accuracy percentage: #{perc[0].percentage}%"  
+							p "tabella (partial) accuracy percentage: #{perc[0].percentage}%"  
 							mixed_percentage = (perc[0].percentage*100+roo_home_perc)/2
 							chance = mixed_percentage/(number_of_black_swans+1)
 							odds_weighted_chance = chance/home_win_odds
@@ -103,10 +103,16 @@ class Stat < ActiveRecord::Base
 							matches_data[match_name][12]= perc[0][0]
 							matches_data[match_name][13]= number_of_black_swans
 						end
+						p "mixed_percentage: #{mixed_percentage}"
+						p "chance: #{chance}"
+						p "odds_weighted_chance: #{odds_weighted_chance}"
+						p "money_needed: #{money_needed}"
+						p "chance_weighted_convenience: #{chance_weighted_convenience}"
 				else
 					p "tabella accuracy percentage not computed."  
 				end
 		else
+			p "nothing-to-say-about: #{time}: #{home_team}: #{home_win_odds} - X: #{draw_odds} - #{away_team}: #{away_win_odds}"
 	 	end
 	 end
 	 
@@ -216,7 +222,8 @@ class Stat < ActiveRecord::Base
 			overall_under_probs = probs_from_match_eval[3].to_i
 			overall_over_probs = probs_from_match_eval[4].to_i
 			if i == 1
-				j  
+				p "#{j}"  
+				p "<a href=#{url}>#{url}</a>"
 				p "Overall Home Wins: #{overall_home_wins}"
 				p  "Overall Draws: #{overall_draws}"
 				p "Overall Away Wins: #{overall_away_wins}"
@@ -284,11 +291,199 @@ class Stat < ActiveRecord::Base
  				end 
  			end
  		end
- 	end 
+ 	end
+ 	
+ 	
+ 	#FOOTBALL-BET-DATA.CO.UK PART
+ 	a = Mechanize.new{ |agent|
+	 	agent.user_agent_alias = 'Mac Safari'
+	}
+
+	a.get('http://www.football-bet-data.yows.co.uk/') do |page|
+		loggedin_page = page.form_with(:action => 'index.asp') do |f|
+			f.x1  = "gtardini@gmail.com"
+			f.x2 = "footballbetdatarokz"
+		end.click_button
+	end
+
+	home_odds = 0
+	draw_odds = 0
+	away_odds = 0
+
+	doc = Nokogiri::HTML(a.post('http://www.football-bet-data.yows.co.uk/index.asp', {"AR1"=>"AR1","AU1"=>"AU1","AU2"=>"AU2","B1"=>"B1","B2"=>"B2","BR1"=>"BR1","BU1"=>"BU1","CH1"=>"CH1","CO1"=>"CO1","CR1"=>"CR1","CZ1"=>"CZ1","CZ2"=>"CZ2","D1"=>"D1","D2"=>"D2","D3"=>"D3","DE1"=>"DE1","DE2"=>"DE2","E0"=>"E0","E1"=>"E1","E2"=>"E2","E3"=>"E3","EC"=>"EC","FI1"=>"FI1","FI2"=>"FI2","FR1"=>"FR1","FR2"=>"FR2","FR3"=>"FR3","G1"=>"G1","G2"=>"G2","HU1"=>"HU1","IC1"=>"IC1","IR1"=>"IR1","IT1"=>"IT1","IT2"=>"IT2","IT3"=>"IT3","J1"=>"J1","J2"=>"J2","MX1"=>"MX1","N1"=>"N1","N2"=>"N2","NO1"=>"NO1","NO2"=>"NO2","PL1"=>"PL1","PL2"=>"PL2","PT1"=>"PT1","PT2"=>"PT2","RO1"=>"RO1","RU1"=>"RU1","SC0"=>"SC0","SC1"=>"SC1","SC2"=>"SC2","SC3"=>"SC3","SI1"=>"SI1","SL1"=>"SL1","SL2"=>"SL2","SP1"=>"SP1","SP2"=>"SP2","SU1"=>"SU1","SU2"=>"SU2","SW1"=>"SW1","SW2"=>"SW2","T1"=>"T1","T2"=>"T2","US1"=>"US1","UK1"=>"UK1","WA1"=>"WA1",
+
+"0-0"=>"0-0","1-0"=>"1-0","2-0"=>"2-0","3-0"=>"3-0","4-0"=>"4-0","5-0"=>"5-0","0-1"=>"0-1","1-1"=>"1-1","2-1"=>"2-1","3-1"=>"3-1","4-1"=>"4-1","5-1"=>"5-1","0-2"=>"0-2","1-2"=>"1-2","2-2"=>"2-2","3-2"=>"3-2","4-2"=>"4-2","5-2"=>"5-2","0-3"=>"0-3","1-3"=>"1-3","2-3"=>"2-3","3-3"=>"3-3","4-3"=>"4-3","5-3"=>"5-3","0-4"=>"0-4","1-4"=>"1-4","2-4"=>"2-4","3-4"=>"3-4","4-4"=>"4-4","5-4"=>"5-4","0-5"=>"0-5","1-5"=>"1-5","2-5"=>"2-5","3-5"=>"3-5","4-5"=>"4-5","5-5"=>"5-5",
+
+"H"=>"H","D"=>"D","A"=>"A",
+
+"0"=>"0","1"=>"1","2"=>"2","3"=>"3","4"=>"4","5"=>"5","6"=>"6","7"=>"7","8"=>"8","9"=>"9","10"=>"10","1-1.25Pho"=>"1-1.25","1.26-1.50Pho"=>"1.26-1.50","1.51-1.80Pho"=>"1.51-1.80","1.81-2.10Pho"=>"1.81-2.10","2.11-2.50Pho"=>"2.11-2.50","2.51-3.00Pho"=>"2.51-3.00","3.01-4.00Pho"=>"3.01-4.00","4.01-5.00Pho"=>"4.01-5.00","5.01-6.00Pho"=>"5.01-6.00","6.01-7.00Pho"=>"6.01-7.00","7.01-100Pho"=>"7.01-100","1-3.45Pdo"=>"1-3.45","3.46-3.69Pdo"=>"3.46-3.69","3.70-3.99Pdo"=>"3.70-3.99","4.00-4.50Pdo"=>"4.00-4.50","4.51-5.00Pdo"=>"4.51-5.00","5.01-5.50Pdo"=>"5.01-5.50","5.51-6.00Pdo"=>"5.51-6.00","6.01-7.00Pdo"=>"6.01-7.00","7.01-8.00Pdo"=>"7.01-8.00","8.01-10.00Pdo"=>"8.01-10.00","10.01-100Pdo"=>"10.01-100","1-1.25Pao"=>"1-1.25","1.26-1.50Pao"=>"1.26-1.50","1.51-1.80Pao"=>"1.51-1.80","1.81-2.10Pao"=>"1.81-2.10","2.11-2.50Pao"=>"2.11-2.50","2.51-3.00Pao"=>"2.51-3.00","3.01-4.00Pao"=>"3.01-4.00","4.01-5.00Pao"=>"4.01-5.00","5.01-6.00Pao"=>"5.01-6.00","6.01-7.00Pao"=>"6.01-7.00","7.01-100Pao"=>"7.01-100","1-1.20Pggo"=>"1-1.20","1.21-1.40Pggo"=>"1.21-1.40","1.41-1.60Pggo"=>"1.41-1.60","1.61-1.80Pggo"=>"1.61-1.80","1.81-2.00Pggo"=>"1.81-2.00","2.01-2.20Pggo"=>"2.01-2.20","2.21-2.40Pggo"=>"2.21-2.40","2.41-2.60Pggo"=>"2.41-2.60","2.61-2.80Pggo"=>"2.61-2.80","2.81-3.00Pggo"=>"2.81-3.00","3.01-100Pggo"=>"3.01-100","1-1.50Pu25o"=>"1-1.50","1.51-1.60Pu25o"=>"1.51-1.60","1.61-1.70Pu25o"=>"1.61-1.70","1.71-1.80Pu25o"=>"1.71-1.80","1.81-1.90Pu25o"=>"1.81-1.90","1.91-2.20Pu25o"=>"1.91-2.20","2.21-2.40Pu25o"=>"2.21-2.40","2.41-2.60Pu25o"=>"2.41-2.60","2.61-2.80Pu25o"=>"2.61-2.80","2.81-3.00Pu25o"=>"2.81-3.00","3.01-100Pu25o"=>"3.01-100","1-1.50Po25o"=>"1-1.50","1.51-1.60Po25o"=>"1.51-1.60","1.61-1.70Po25o"=>"1.61-1.70","1.71-1.80Po25o"=>"1.71-1.80","1.81-1.90Po25o"=>"1.81-1.90","1.91-2.20Po25o"=>"1.91-2.20","2.21-2.40Po25o"=>"2.21-2.40","2.41-2.60Po25o"=>"2.41-2.60","2.61-2.80Po25o"=>"2.61-2.80","2.81-3.00Po25o"=>"2.81-3.00","3.01-100Po25o"=>"3.01-100",
+
+"0-1.25Aho"=>"0-1.25","1.26-1.50Aho"=>"1.26-1.50","1.51-1.80Aho"=>"1.51-1.80","1.81-2.10Aho"=>"1.81-2.10","2.11-2.50Aho"=>"2.11-2.50","2.51-3.00Aho"=>"2.51-3.00","3.01-4.00Aho"=>"3.01-4.00","4.01-5.00Aho"=>"4.01-5.00","5.01-6.00Aho"=>"5.01-6.00","6.01-7.00Aho"=>"6.01-7.00","7.01-100Aho"=>"7.01-100",
+
+"0-3.45Ado"=>"0-3.45","3.46-3.69Ado"=>"3.46-3.69","3.70-3.99Ado"=>"3.70-3.99","4.00-4.50Ado"=>"4.00-4.50","4.51-5.00Ado"=>"4.51-5.00","5.01-5.50Ado"=>"5.01-5.50","5.51-6.00Ado"=>"5.51-6.00","6.01-7.00Ado"=>"6.01-7.00","7.01-8.00Ado"=>"7.01-8.00","8.01-10.00Ado"=>"8.01-10.00","10.01-100Ado"=>"10.01-100",
+
+"0-1.25Aao"=>"0-1.25","1.26-1.50Aao"=>"1.26-1.50","1.51-1.80Aao"=>"1.51-1.80","1.81-2.10Aao"=>"1.81-2.10","2.11-2.50Aao"=>"2.11-2.50","2.51-3.00Aao"=>"2.51-3.00","3.01-4.00Aao"=>"3.01-4.00","4.01-5.00Aao"=>"4.01-5.00","5.01-6.00Aao"=>"5.01-6.00","6.01-7.00Aao"=>"6.01-7.00","7.01-100Aao"=>"7.01-100",
+
+"2011"=>"2011","2012"=>"2012","rDate"=>"tod","stage"=>"2"}).content)
+
+	table = doc.xpath("//table[contains(@id, 'table-3')]")
+	rows = table.xpath(".//tr").drop(1)
+	matches = {}
+	i=0
+	for row in rows
+		buffer = []
+		date = row.children[0].text
+		league = row.children[1].text.strip
+		home_team = row.children[2].text
+		away_team = row.children[3].text
+		h_odds = row.children[9].text.strip.to_f
+		d_odds = row.children[10].text.strip.to_f
+		a_odds = row.children[11].text.strip.to_f
+		cs_odds = row.children[12].text.strip.to_f
+		cs_prediction = row.children[13].text
+		prediction = row.children[14].text
+		goals_prediction = row.children[15].text.strip.to_i
+		pred_h_odds = row.children[16].text.strip.to_f
+		pred_d_odds = row.children[17].text.strip.to_f
+		pred_a_odds = row.children[18].text.strip.to_f
+		pred_gg_odds = row.children[19].text.strip.to_f
+		buffer << date << league << home_team << away_team << h_odds << d_odds << a_odds << cs_odds << cs_prediction << prediction << goals_prediction << pred_h_odds << pred_d_odds << pred_a_odds << pred_gg_odds
+		matches.store(i, buffer)
+		i += 1
+	end
+
+	i = 0
+	for match in matches
+		league = match[1][1]
+		home_odds = match[1][4]
+		draw_odds = match[1][5]
+		away_odds = match[1][6]
+		home_team = match[1][2]
+		away_team = match[1][3]
+		post_data = {"#{league}"=>"#{league}",
+  "0-0"=>"0-0","1-0"=>"1-0","2-0"=>"2-0","3-0"=>"3-0","4-0"=>"4-0","5-0"=>"5-0","0-1"=>"0-1","1-1"=>"1-1","2-1"=>"2-1","3-1"=>"3-1","4-1"=>"4-1","5-1"=>"5-1","0-2"=>"0-2","1-2"=>"1-2","2-2"=>"2-2","3-2"=>"3-2","4-2"=>"4-2","5-2"=>"5-2","0-3"=>"0-3","1-3"=>"1-3","2-3"=>"2-3","3-3"=>"3-3","4-3"=>"4-3","5-3"=>"5-3","0-4"=>"0-4","1-4"=>"1-4","2-4"=>"2-4","3-4"=>"3-4","4-4"=>"4-4","5-4"=>"5-4","0-5"=>"0-5","1-5"=>"1-5","2-5"=>"2-5","3-5"=>"3-5","4-5"=>"4-5","5-5"=>"5-5",
+  "H"=>"H","D"=>"D","A"=>"A",
+  "0"=>"0","1"=>"1","2"=>"2","3"=>"3","4"=>"4","5"=>"5","6"=>"6","7"=>"7","8"=>"8","9"=>"9","10"=>"10",
+  "1-1.25Pho"=>"1-1.25","1.26-1.50Pho"=>"1.26-1.50","1.51-1.80Pho"=>"1.51-1.80","1.81-2.10Pho"=>"1.81-2.10","2.11-2.50Pho"=>"2.11-2.50","2.51-3.00Pho"=>"2.51-3.00","3.01-4.00Pho"=>"3.01-4.00","4.01-5.00Pho"=>"4.01-5.00","5.01-6.00Pho"=>"5.01-6.00","6.01-7.00Pho"=>"6.01-7.00","7.01-100Pho"=>"7.01-100",
+  "1-3.45Pdo"=>"1-3.45","3.46-3.69Pdo"=>"3.46-3.69","3.70-3.99Pdo"=>"3.70-3.99","4.00-4.50Pdo"=>"4.00-4.50","4.51-5.00Pdo"=>"4.51-5.00","5.01-5.50Pdo"=>"5.01-5.50","5.51-6.00Pdo"=>"5.51-6.00","6.01-7.00Pdo"=>"6.01-7.00","7.01-8.00Pdo"=>"7.01-8.00","8.01-10.00Pdo"=>"8.01-10.00","10.01-100Pdo"=>"10.01-100",
+  "1-1.25Pao"=>"1-1.25","1.26-1.50Pao"=>"1.26-1.50","1.51-1.80Pao"=>"1.51-1.80","1.81-2.10Pao"=>"1.81-2.10","2.11-2.50Pao"=>"2.11-2.50","2.51-3.00Pao"=>"2.51-3.00","3.01-4.00Pao"=>"3.01-4.00","4.01-5.00Pao"=>"4.01-5.00","5.01-6.00Pao"=>"5.01-6.00","6.01-7.00Pao"=>"6.01-7.00","7.01-100Pao"=>"7.01-100",
+  "1-1.20Pggo"=>"1-1.20","1.21-1.40Pggo"=>"1.21-1.40","1.41-1.60Pggo"=>"1.41-1.60","1.61-1.80Pggo"=>"1.61-1.80","1.81-2.00Pggo"=>"1.81-2.00","2.01-2.20Pggo"=>"2.01-2.20","2.21-2.40Pggo"=>"2.21-2.40","2.41-2.60Pggo"=>"2.41-2.60","2.61-2.80Pggo"=>"2.61-2.80","2.81-3.00Pggo"=>"2.81-3.00","3.01-100Pggo"=>"3.01-100",
+  "1-1.50Pu25o"=>"1-1.50","1.51-1.60Pu25o"=>"1.51-1.60","1.61-1.70Pu25o"=>"1.61-1.70","1.71-1.80Pu25o"=>"1.71-1.80","1.81-1.90Pu25o"=>"1.81-1.90","1.91-2.20Pu25o"=>"1.91-2.20","2.21-2.40Pu25o"=>"2.21-2.40","2.41-2.60Pu25o"=>"2.41-2.60","2.61-2.80Pu25o"=>"2.61-2.80","2.81-3.00Pu25o"=>"2.81-3.00","3.01-100Pu25o"=>"3.01-100",
+  "1-1.50Po25o"=>"1-1.50","1.51-1.60Po25o"=>"1.51-1.60","1.61-1.70Po25o"=>"1.61-1.70","1.71-1.80Po25o"=>"1.71-1.80","1.81-1.90Po25o"=>"1.81-1.90","1.91-2.20Po25o"=>"1.91-2.20","2.21-2.40Po25o"=>"2.21-2.40","2.41-2.60Po25o"=>"2.41-2.60","2.61-2.80Po25o"=>"2.61-2.80","2.81-3.00Po25o"=>"2.81-3.00","3.01-100Po25o"=>"3.01-100",
+  "2011"=>"2011","2012"=>"2012","rDate"=>"all","stage"=>"2"}
+
+ 	 if home_odds >= 1 && home_odds <= 1.25
+	 	post_data = post_data.merge "0-1.25Aho"=>"0-1.25"
+	 elsif home_odds >= 1.26 && home_odds <= 1.50
+	 	post_data = post_data.merge  "1.26-1.50Aho"=>"1.26-1.50"  
+	 elsif home_odds >= 1.51 && home_odds <= 1.80
+	 	post_data = post_data.merge  "1.51-1.80Aho"=>"1.51-1.80"  
+	 elsif home_odds >= 1.81 && home_odds <= 2.10
+	 	post_data = post_data.merge  "1.81-2.10Aho"=>"1.81-2.10"  
+	 elsif home_odds >= 2.11 && home_odds <= 2.50
+	 	post_data = post_data.merge  "2.11-2.50Aho"=>"2.11-2.50"  
+	 elsif home_odds >= 2.51 && home_odds <= 3.00
+	 	post_data = post_data.merge  "2.51-3.00Aho"=>"2.51-3.00"  
+	 elsif home_odds >= 3.01 && home_odds <= 4.00
+	 	post_data = post_data.merge  "3.01-4.00Aho"=>"3.01-4.00"  
+	 elsif home_odds >= 4.01 && home_odds <= 5.00
+	 	post_data = post_data.merge  "4.01-5.00Aho"=>"4.01-5.00"  
+	 elsif home_odds >= 5.01 && home_odds <= 6.00
+	 	post_data = post_data.merge  "5.01-6.00Aho"=>"5.01-6.00"  
+	 elsif home_odds >= 6.01 && home_odds <= 7.00
+	 	post_data = post_data.merge  "6.01-7.00Aho"=>"6.01-7.00"  
+	 elsif home_odds >= 7.01 && home_odds <= 100
+	 	post_data = post_data.merge  "7.01-100Aho"=>"7.01-100"  
+	 end
+
+	 if draw_odds >= 0 && draw_odds <= 3.45
+		post_data = post_data.merge  "0-3.45Ado"=>"0-3.45"  
+	 elsif draw_odds >= 3.46 && draw_odds <= 3.69
+	 	post_data = post_data.merge  "3.46-3.69Ado"=>"3.46-3.69"  
+	 elsif draw_odds >= 3.70 && draw_odds <= 3.99
+	 	post_data = post_data.merge  "3.70-3.99Ado"=>"3.70-3.99"  
+	 elsif draw_odds >= 4.00 && draw_odds <= 4.50
+	 	post_data = post_data.merge  "4.00-4.50Ado"=>"4.00-4.50"  
+	 elsif draw_odds >= 4.51 && draw_odds <= 5.00
+	 	post_data = post_data.merge  "4.51-5.00Ado"=>"4.51-5.00"  
+	 elsif draw_odds >= 5.01 && draw_odds <= 5.50
+	 	post_data = post_data.merge  "5.01-5.50Ado"=>"5.01-5.50"  
+	 elsif draw_odds >= 5.51 && draw_odds <= 6.00
+	 	post_data = post_data.merge  "5.51-6.00Ado"=>"5.51-6.00"  
+	 elsif draw_odds >= 6.01 && draw_odds <= 7.00
+	 	post_data = post_data.merge  "6.01-7.00Ado"=>"6.01-7.00"  
+	 elsif draw_odds >= 7.01 && draw_odds <= 8.00
+	 	post_data = post_data.merge  "7.01-8.00Ado"=>"7.01-8.00"  
+	 elsif draw_odds >= 8.01 && draw_odds <= 10.00
+	 	post_data = post_data.merge  "8.01-10.00Ado"=>"8.01-10.00"  
+	 elsif draw_odds >= 10.01 && draw_odds <= 100
+	 	post_data = post_data.merge  "10.01-100Ado"=>"10.01-100"  
+	 end
+
+	 if away_odds >= 1 && away_odds <= 1.25
+		post_data = post_data.merge  "0-1.25Aao"=>"0-1.25"  
+	elsif away_odds >= 1.26 && away_odds <= 1.50
+    	post_data = post_data.merge  "1.26-1.50Aao"=>"1.26-1.50"  
+    elsif away_odds >= 1.51 && away_odds <= 1.80
+    	post_data = post_data.merge  "1.51-1.80Aao"=>"1.51-1.80"  
+    elsif away_odds >= 1.81 && away_odds <= 2.10
+    	post_data = post_data.merge  "1.81-2.10Aao"=>"1.81-2.10"  
+    elsif away_odds >= 2.11 && away_odds <= 2.50
+    	post_data = post_data.merge  "2.11-2.50Aao"=>"2.11-2.50"  
+    elsif away_odds >= 2.51 && away_odds <= 3.00
+    	post_data = post_data.merge  "2.51-3.00Aao"=>"2.51-3.00"  
+    elsif away_odds >= 3.01 && away_odds <= 4.00
+    	post_data = post_data.merge  "3.01-4.00Aao"=>"3.01-4.00"  
+    elsif away_odds >= 4.01 && away_odds <= 5.00
+    	post_data = post_data.merge  "4.01-5.00Aao"=>"4.01-5.00"  
+    elsif away_odds >= 5.01 && away_odds <= 6.00
+    	post_data = post_data.merge  "5.01-6.00Aao"=>"5.01-6.00"  
+    elsif away_odds >= 6.01 && away_odds <= 7.00
+    	post_data = post_data.merge  "6.01-7.00Aao"=>"6.01-7.00"  
+    elsif away_odds >= 7.01 && away_odds <= 100
+    	post_data = post_data.merge  "7.01-100Aao"=>"7.01-100"  
+    end
+    
+    p "<b>#{home_team} vs #{away_team}</b><br>"
+    
+    doc = Nokogiri::HTML(a.post('http://www.football-bet-data.yows.co.uk/index.asp', post_data).content)
+    table = doc.xpath("//table[contains(@id, 'table-3')]")
+    rows = table.xpath(".//tr").drop(1)
+    for row in rows
+    	buffer = []
+    	date = row.children[0].text
+    	league = row.children[1].text.strip
+    	home_team = row.children[2].text
+    	away_team = row.children[3].text
+    	final_score = row.children[4].text
+    	result = row.children[5].text
+    	tot_goals = row.children[8].text.to_i
+    	h_odds = row.children[9].text.strip.to_f
+    	d_odds = row.children[10].text.strip.to_f
+    	a_odds = row.children[11].text.strip.to_f
+    	cs_odds = row.children[12].text.strip.to_f
+    	cs_prediction = row.children[13].text
+    	prediction = row.children[14].text
+    	goals_prediction = row.children[15].text.strip.to_i
+    	pred_h_odds = row.children[16].text.strip.to_f
+    	pred_d_odds = row.children[17].text.strip.to_f
+    	pred_a_odds = row.children[18].text.strip.to_f
+    	pred_gg_odds = row.children[19].text.strip.to_f
+    	buffer << date << league << home_team << away_team << final_score << result << tot_goals << h_odds << d_odds << a_odds << cs_odds << cs_prediction << prediction << goals_prediction << pred_h_odds << pred_d_odds << pred_a_odds << pred_gg_odds
+    	#p buffer
+    end
+    #p "------------------"
+    overall_table = doc.xpath("//table[contains(@bordercolor, '#e5e5e5')]")
+    overall_rows = overall_table.xpath(".//tr")
+    p overall_rows.text
+    i += 1
+    end
    end
 end
 
 
+
+#CLASS STAT END - METHODS COMING NEXT
 def simulate_bets(days)
   picks = []
   days.each{
@@ -477,17 +672,17 @@ def bookie_percentages(oo, home_win_odds)
 	end
 	 
 	
-	  "#{tot_i} right out of #{tot_n} >= #{min_odds} && <= #{max_odds}, out of which #{tot_i_h} home wins and #{tot_i_a} away wins"  
-	  "#{tot_h} unexpected home wins"  
-	  "#{tot_d} unexpected draws, out of which #{tot_d_h} were home favs and #{tot_d_a} were away favs"  
-	  "#{tot_a} unexpected away wins"  
-	  "BOOKIE PERCENTAGES:"  
+	  p "#{tot_i} right out of #{tot_n} >= #{min_odds} && <= #{max_odds}, out of which #{tot_i_h} home wins and #{tot_i_a} away wins"  
+	  p "#{tot_h} unexpected home wins"  
+	  p "#{tot_d} unexpected draws, out of which #{tot_d_h} were home favs and #{tot_d_a} were away favs"  
+	  p "#{tot_a} unexpected away wins"  
+	  p "BOOKIE PERCENTAGES:"  
 	 
 	  right_home_win_perc = (tot_i_h.to_f/(tot_i_h + tot_d_h + tot_a).to_f) * 100
 	  right_away_win_perc = (tot_i_a.to_f/(tot_i_a + tot_d_a + tot_h).to_f) * 100
 	 
-	  "right home win predictions: #{right_home_win_perc}%"  
-	  "right away win predictions: #{right_away_win_perc}%"  
+	  p "right home win predictions: #{right_home_win_perc}%"  
+	  p "right away win predictions: #{right_away_win_perc}%"  
 	
 	 
 	montecarlo_generated_series = simulate_bets(date_hash)
