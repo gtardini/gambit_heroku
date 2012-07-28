@@ -100,7 +100,7 @@ class Stat < ActiveRecord::Base
 							matches_data[match_name][9]= chance_weighted_convenience
 							matches_data[match_name][10]= roo_home_perc
 							matches_data[match_name][11]= roo_away_perc
-							matches_data[match_name][12]= perc[0][0]
+							matches_data[match_name][12]= perc[0].percentage
 							matches_data[match_name][13]= number_of_black_swans
 						end
 						p "mixed_percentage: #{mixed_percentage}"
