@@ -1,4 +1,4 @@
 class Stat < ActiveRecord::Base
-	def pushMail(oo, stats)
+	def push_mail(oo, stats)
 	end
 end

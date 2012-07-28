@@ -1,2 +1,8 @@
-<% Stat.find(2).delay.pushMail(@oo, @stats) %>
+<% 
+
+oo = @oo
+stats = @stats
+Stat.find(2).delay.push_mail(1,2) 
+
+%>
 pushed to worker...
